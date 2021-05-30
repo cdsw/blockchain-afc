@@ -1,0 +1,170 @@
+%Doc class
+\documentclass[a4paper,12pt,oneside, utf8x]{report} 
+%Packages
+%\usepackage[utf8]{inputenc} 
+\usepackage[ %Bibliography
+  backend   = bibtex,
+  sortcites = true,
+  sorting   = nty,
+  style     = ieee
+  ]{biblatex}
+\usepackage{geometry}
+\usepackage{longtable} %for tables
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage[title,titletoc,toc]{appendix}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{tocloft}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage[format=plain,font=it]{caption}
+
+\renewcommand\cftfigpresnum{Figure }
+\renewcommand\cftfigaftersnum{.}
+\addtolength{\cftfignumwidth}{35pt}
+\renewcommand\cfttabpresnum{Table }
+\renewcommand\cfttabaftersnum{.}
+\addtolength{\cfttabnumwidth}{27pt}
+\emergencystretch=1em
+
+\usepackage{url}
+\urlstyle{same}
+
+%Bibliography loading
+\addbibresource{ref.bib}
+
+%Formatting
+\geometry{a4paper, top = 1in, bottom = 1in, left = 1.5in, right = 1in,}
+\titleformat{\chapter}[display]{\bfseries\centering}{\LARGE Chapter \thechapter}{-0.5em}{\LARGE}
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\chapter}{0pt}{*4}{*1.5}
+
+
+%TEXT SHORTCUTS
+\newcommand{\projfull}{Universal IoT hardware platform for sensor data collection}
+\newcommand{\projshort}{SenseStack}
+\newcommand{\itwoc}{I$^2$C}
+
+%GRAPHICS
+\graphicspath{{figures/}}
+
+\begin{document}
+\linespread{1.6}\selectfont
+
+%------------------Acknowledgement----------------
+\begin{titlepage}
+\pagestyle{empty}
+    \hfill \break \hfill \break
+    {{\huge \centering \textbf{Acknowledgement}\par}
+    \hfill \break \hfill \break
+    --acknowledgement page--
+
+    }
+\end{titlepage}
+
+%------------------ABSTRACT PAGE------------------
+\begin{titlepage}
+
+\pagestyle{empty}
+    \hfill \break \hfill \break
+    {{\huge \centering \textbf{Abstract}\par}
+    \hfill \break 
+    --abstract--
+    }
+\end{titlepage}
+
+\setlength{\cftbeforetoctitleskip}{-4em}
+\setlength{\cftaftertoctitleskip}{-1.3em}
+\setlength{\cftbeforeloftitleskip}{-4em}
+\setlength{\cftafterloftitleskip}{-1.3em}
+\setlength{\cftbeforelottitleskip}{-4em}
+\setlength{\cftafterlottitleskip}{-1.3em}
+
+
+\renewcommand{\contentsname}{\hfill Table of Contents \hfill}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\tableofcontents
+\newpage
+%-------------------------------------------------------------------
+\renewcommand{\listfigurename}{\hfill List of Figures \hfill}
+\listoffigures
+\newpage
+%-------------------------------------------------------------------
+\renewcommand{\listtablename}{\hfill List of Tables \hfill}
+\listoftables
+
+
+%------------------INTRODUCTION-----------------
+%---------EVERY PAGE/SECTION SHOULD CONTAIN A REFERENCE.
+\chapter{Introduction}
+\section{Brief Overview}
+    --section--
+	Itemization
+    \begin{itemize}
+        \item example item
+    \end{itemize}
+    
+    Table
+    
+    \begin{center}
+        \label{table:terminols}
+        \begin{longtable}{|p{4cm}|p{9cm}|}
+        \caption{Terminologies used in \projshort}\\
+        \hline
+        \textbf{Term} & \textbf{Definition} \\
+        \hline
+        \endfirsthead
+        \multicolumn{2}{c}%
+        {\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+        \hline
+        \textbf{Term} & \textbf{Definition} \\ \hline
+        \endhead
+        \hline \multicolumn{2}{r}{\textit{Continued on next page}} \\
+        \endfoot
+        \hline
+        \endlastfoot
+        Environmental Sensor & A piece of hardware which measures some environmental condition in its surrounding location. \\ \hline
+        Sensor module & A module which consists of a sensor hardware and a MCU which senses environmental data. \\ \hline
+        Main module & The core of a node which gathers data from sensor modules and provides data to external clients.\\ \hline
+        Node & A functioning compound of one main module and up to 10 sensor modules. \\ \hline
+        Geolocation & Positional data on earth in the format of longitude and latitude. \\ \hline
+        Basic user & An observer user which uses the platform only for gathering and viewing environmental data. \\ \hline
+        Advanced user & A basic user which intends to extend the platform. \\ \hline
+        Intra-node Comm. & Communication mechanism between sensor module(s) and a main module. \\ \hline
+        In-sensor Comm. & Communication mechanism between sensor unit and a MCU inside a sensor module. \\ \hline
+        External Comm. & Communication mechanism to emit data from main module to an external target. \\ \hline
+        \end{longtable}
+        \end{center}
+figure
+    
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=.9\textwidth]{ecl1.jpg}
+            \caption{Conventional IoT Network Formation \cite{eclipseIoT}}
+            \label{fig:eclipse_1}
+        \end{figure} 
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=.9\textwidth]{ecl2.jpg}
+            \caption{IoT Network United by EclipseIoT \cite{eclipseIoT}}
+            \label{fig:eclipse_2}
+        \end{figure}
+    
+ 
+\begin{appendices}
+
+\titleformat{\chapter}[display]{\bfseries\centering}{\LARGE Appendix \thechapter}{-0.5em}{\LARGE}
+
+    \chapter{Sensor Module \itwoc{} Addresses}
+        \label{appx:i2c}
+        appendix
+\end{appendices}
+\end{document}
