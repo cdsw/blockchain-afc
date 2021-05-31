@@ -1,0 +1,166 @@
+%Doc class
+\documentclass[a4paper,12pt,oneside, utf8x]{report} 
+%Packages
+\usepackage[UTF8]{ctex}
+\usepackage[ %Bibliography
+  backend   = bibtex,
+  sortcites = true,
+  sorting   = nty,
+  style     = ieee
+  ]{biblatex}
+\usepackage{geometry}
+\usepackage{longtable} %for tables
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{setspace}
+\usepackage[title,titletoc,toc]{appendix}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{tocloft}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage[format=plain,font=it]{caption}
+
+\renewcommand\cftfigpresnum{Figure }
+\renewcommand\cftfigaftersnum{.}
+\addtolength{\cftfignumwidth}{35pt}
+\renewcommand\cfttabpresnum{Table }
+\renewcommand\cfttabaftersnum{.}
+\addtolength{\cfttabnumwidth}{27pt}
+\emergencystretch=1em
+
+\usepackage{url}
+\urlstyle{same}
+
+%Bibliography loading
+\addbibresource{ref.bib}
+
+%Formatting
+\geometry{a4paper, top = 1in, bottom = 1in, left = 1.5in, right = 1in,}
+\titleformat{\chapter}[display]{\bfseries\centering}{\LARGE Chapter \thechapter}{-0.5em}{\LARGE}
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\chapter}{0pt}{*4}{*1.5}
+
+
+%TEXT SHORTCUTS
+\newcommand{\projfull}{Exploring Possibilities in Incorporating Blockchain-based Distributed Ledgers in Rapid Transit Automated Fare Collection (AFC) Backend}
+
+%GRAPHICS
+\graphicspath{{figures/}}
+
+\begin{document}
+\linespread{1.6}\selectfont
+
+%------------------Acknowledgement----------------
+\begin{titlepage}
+\pagestyle{empty}
+    \hfill \break \hfill \break
+    {{\huge \centering \textbf{Acknowledgement}\par}
+    \hfill \break \hfill \break
+    --acknowledgement page--
+
+    }
+\end{titlepage}
+
+%------------------ABSTRACT PAGE------------------
+\begin{titlepage}
+
+\pagestyle{empty}
+    \hfill \break \hfill \break
+    {{\huge \centering \textbf{Abstract}\par}
+    \hfill \break 
+    Studies regarding the application of blockchain in public services have been growing rapidly thanks to its decentralization, immutability, and transparency properties. Smart cities aim for more governance auditability and financial openness, both achievable by the mean of distributed ledgers and digital fund transfer. Adopting some analogies from already-studied blockchain-based toll collection systems, this research attempts to realize a blockchain-based automated fare collection in rapid transit systems using Hyperledger Fabric and scrutinize its feasibility. A dynamic pricing application built on the system acts as an example application which can help incentivizing transit operators in running the novel system.
+    }
+\end{titlepage}
+
+\setlength{\cftbeforetoctitleskip}{-4em}
+\setlength{\cftaftertoctitleskip}{-1.3em}
+\setlength{\cftbeforeloftitleskip}{-4em}
+\setlength{\cftafterloftitleskip}{-1.3em}
+\setlength{\cftbeforelottitleskip}{-4em}
+\setlength{\cftafterlottitleskip}{-1.3em}
+
+
+\renewcommand{\contentsname}{\hfill Table of Contents \hfill}
+\renewcommand{\cftaftertoctitle}{\hfill}
+\tableofcontents
+\newpage
+%-------------------------------------------------------------------
+\renewcommand{\listfigurename}{\hfill List of Figures \hfill}
+\listoffigures
+\newpage
+%-------------------------------------------------------------------
+\renewcommand{\listtablename}{\hfill List of Tables \hfill}
+\listoftables
+
+
+%------------------INTRODUCTION-----------------
+%---------EVERY PAGE/SECTION SHOULD CONTAIN A REFERENCE.
+\chapter{Introduction}
+\label{cintro}
+\section{Brief Overview}\
+\label{sbriefov}
+   Rapid transit has been an essential component of popular urban transportation settings. In 2019 alone, Beijing Metro and Shanghai Metro each saw almost 4 billion annual rides \cite{a1} which may translate to 300–400 transactions per second. Normally, every ride requires a passenger to ‘tap in’ and ‘tap out’ a stored-value smart card or in-smartphone virtual card onto control gates given that the smart card has sufficient balance; the card balance is rechargeable through ticketing machines. One example is China’s T-Union smart card which works with public transport systems in 274 cities/regions and 5 other systems by 2019 \cite{a2}.
+   
+Each smart card interaction with front-end devices (e.g., control gate, ticketing machine, mobile top-up application) triggers a transaction, which then is logged and recorded in the rail authority’s server. Currently, payments and logging are handled in traditional centralized servers and databases \cite{a3,a4} using the client-server architecture. Such conventional method of managing and storing data is prone to data compromise and loss due to lack of persistence and decentralized management \cite{a5}. Dang, et al. \cite{a6} shows an example attack which tries to alter transaction information by exploiting account–cloud data transmission.
+
+On the other hand, blockchain, a distributed ledger data structure, relies on full or partial decentralization, consensus, and secure cryptographic functions that assure trust, data immutability and persistence, and transparency \cite{a7}. Towards early 2020s, more and more companies and governmental bodies aim to adopt blockchain concept to their business and governance processes. One example is China’s national blockchain network initiative called Blockchain-based Service Network (BSN), a nationwide blockchain resource environment for public to develop blockchain applications on \cite{a8}.
+
+Running a blockchain network requires a significant resource even in a private blockchain, especially in a network as huge as a rapid transit system. More transaction implies increased resource demand; therefore, this research resurrects an idea of dynamic pricing in rapid transit to bring the company more incentive during peak hours and to entice passengers to take discounted non-peak-hour fare.
+
+\section{Problem Description}
+\label{sprobdesc}
+This research will explore possible methods to tackle the issues of data stability, data analytics-compliance, and scalability in rapid transit AFC system with special focus to blockchain concept. Furthermore, there is an intention to assess the proposed system with respect to its compatibility to produce big data for data analytics applications, in this case, dynamic pricing. Three “S” factors serve as base benchmarks:
+\begin{enumerate}
+\item \textbt{Stability}: measures availability and data persistence if there is fault in data-handling entities,
+\item \textbt{Searchability}: measures data completeness, correctness, and access convenience strictly for data analytics uses, and
+\item \textbt{Scalability}: measures system ability to adapt with requirement or capacity changes.
+\end{enumerate}
+
+\section{Motivation}
+\label{smotiv}
+The main motive behind migrating transit business process from conventional cloud to blockchain established around the recent rapid corporate and governmental adoption of blockchain as a new disruptive standard, though this is still in its infancy \cite{a9}. Switzerland, a blockchain proponent nation, has encouraged companies to implement businesses in blockchain by founding a “blockchain cluster” or a “Blockchain Valley” in the city of Zug \cite{a10}. China has also moved forward by building a national blockchain initiative called Blockchain Service Network (BSN) which serves any individual and corporate to build blockchain applications on \cite{a8}.
+
+Not only promoting data security, integrity, and system faultlessness, blockchain adoption also aligns with big data and artificial intelligence trend in a way that the three will support each other in producing new meaningful findings and data. In the case of rapid transit, persistent and transparent data allow private and public parties to perform data analytics, for instance, to predict peak hours or to maximize operation revenue by introducing a measured dynamic price. 
+
+\section{Objectives and Scope}
+In brief, the ultimate outcome of this research is a novel blockchain-based rapid transit AFC backend that is stable, searchable, and scalable, alongside with a comparison between the proposed system with current AFC in the three benchmarks. The term ‘backend’ here refers to mechanisms of registering passenger trips, calculating each trip’s fare, storing, and retrieving trip details. Frontend functions such as smart card handler and ticket booking are beyond this research’s focus.
+
+This experiment hypothesizes several advantages and disadvantages of the blockchain-based AFC system over the state-of-the-arts AFC system, namely:
+\begin{enumerate}
+\item Blockchain-based AFC will see less data and synchronization failure upon normal circumstances due to partial decentralization,
+\item Modularity and architecture openness of Hyperledger Fabric allows higher scalability, manageability, and adaptability to change compared to conventional proprietary, per-project AFC architectures,
+\item Immutable nature of blockchain records promotes correctness and auditability in such a way that also benefits data analytics in different levels (private and public uses),
+\item Blockchain-based AFC dampens the probability of attack due to transaction encryption, consensus, and trust mechanisms, unlike plain transaction-via-ethernet,
+\item Despite the prior advantages, this experiment expects a trade-off in performance due to blockchain’s more complex data entry mechanisms compared to conventional databases.
+\item Dynamic pricing based on demand analysis will deliver more revenue and reduce congestion; however, when calibrated and calculated improperly, this may result in customer dissatisfaction.
+\end{enumerate}
+
+To limit the complex nature of developing such a system, this research will present a proof of work of blockchain-backed AFC backend using minimal architecture based on Linux’s Hyperledger Fabric and sufficient Node.js dynamic pricing program which will satisfy the three criteria defined in Section \ref{smotiv}.
+
+
+
+
+
+
+
+
+
+\DeclareFieldFormat{labelnumberwidth}{\textbf{[#1]}}
+\printbibliography[heading=bibintoc,title={Bibliography}]
+ 
+\begin{appendices}
+
+\titleformat{\chapter}[display]{\bfseries\centering}{\LARGE Appendix \thechapter}{-0.5em}{\LARGE}
+
+    \chapter{Appendix1}
+        \label{appx:label1}
+        appendix
+\end{appendices}
+\end{document}
