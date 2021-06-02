@@ -1,7 +1,7 @@
 %Doc class
 \documentclass[a4paper,12pt,oneside, utf8x]{report} 
 %Packages
-\usepackage[UTF8]{ctex}
+\usepackage[UTF8, scheme = plain]{ctex}
 \usepackage[ %Bibliography
   backend   = bibtex,
   sortcites = true,
@@ -25,6 +25,8 @@
 \usepackage{titlesec}
 \usepackage{parskip}
 \usepackage[format=plain,font=it]{caption}
+
+
 
 \renewcommand\cftfigpresnum{Figure }
 \renewcommand\cftfigaftersnum{.}
@@ -144,6 +146,248 @@ This experiment hypothesizes several advantages and disadvantages of the blockch
 
 To limit the complex nature of developing such a system, this research will present a proof of work of blockchain-backed AFC backend using minimal architecture based on Linux’s Hyperledger Fabric and sufficient Node.js dynamic pricing program which will satisfy the three criteria defined in Section \ref{smotiv}.
 
+\chapter{Literature Review}
+\label{clreview}
+\section{Automated Fare Collection (AFC)}
+\subsection{Overview of AFC}
+Automated fare collection (AFC) is a function in rapid transit system which handles ticket lifetime management, fund storage, fare collection, and transaction execution and storage in a semi-automatic manner. The following subsections will describe the operation of current AFC systems in several parts of the world.
+\subsection{AFC Architecture}
+Typical AFCs consist of electronic ticket cards (‘cards’), ticket machines, passenger control gates (‘gates’), and backend system \cite{a11}, see Fig. \ref{f21currentaafc}. An electronic transit card is a payment media of an AFC system which may or may not map to a transit account. Cards are usually in a form of RFID stored-value smart cards whose balance is refillable through ticket machines and are issued from ticket machines.
+
+Based on cards’ scope of usage, there are two types of fare media: closed-loop system in which proprietary cards work only in one or limited number of transit systems; and open-loop system where general-use cards issued by external authorities, e.g., contactless bank card, can be used as a fare media \cite{a12,a13}. Closed-loop system is more optimal when a rapid transit company prioritizes speed, extensive fare rule customization, and autonomous management, while open-loop system aims to boost interoperability with other fare media and lowering costs to produce proprietary cards \cite{a14}.
+
+Some cards are in the form of virtually installed in Near Field Communication (NFC)-enabled phone, issued and rechargeable through a mobile application \cite{a13,a15}. Account-based passenger card registrar system is getting more popular due to its flexibility in usage and management. Such system avoids storing balance information inside cards but inside a central database, therefore promoting flexibility in service variation, fare policies, and effective validation \cite{a13}.
+
+Passenger control gate registers and logs transactions arising from passengers’ entry and exit through its card readers. Gates are also in charge of calculating fares based on passengers’ trip and fare structure, except in some real-time account-based system where fare processing is performed in the back office \cite{a15}. These devices exchange data with a station control inside a station through a telecommunication backbone network such as ethernet, optical cable, and/or internet. Station control contains servers and databases which manages the overall AFC operation and logging transaction and trip details of the station \cite{a4,a16}. 
+
+Ultimately, a system-wide central clearing house (CCH) administers and gathers all stations’ AFC business, account identities, and communicate with external supporting services such as banks and transit operators \cite{a4,a11} to settle financial clearing and to provide data to concerning parties \cite{a13,a15,a18}. As the term CCH implies, all management systems are centralized in a single host \cite{a4,a15}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.96\textwidth]{figures/2-1.png}
+        \caption{Current AFC architecture}
+        \label{f21currentaafc}
+    \end{figure}
+    
+\subsection{Transaction Flow}
+In general, two cases of fund transfer constitute transactions in AFC: card top-up and fare payment. Card top-up adds monetary value to account balance associated with the card spendable for transit fares. Fare payment consists of three major steps: entrance, exit, and settlement. Refer to Fig. \ref{f22currentaafc}. 
+
+Beginning the trip, a passenger typically taps a transit card onto an RFID reader on an entrance gate. A computing device in the gate checks the card’s validity, including scrutinizing card number, the expiration, and the balance. Given that passenger taps a legitimate card, gate records the entrance both to the server’s metro data file and into the card, then opens the gate for passenger to begin the trip \cite{a6}. Upon exit, the exit gate performs identical validation and recording, calculates the fare based on fare structure, updates card balance inside the card and the server, then opens the gate \cite{a13}. Fund deduction and settlement are usually done offline to avoid users waiting too long for gate to open (i.e., more than 500 milliseconds \cite{a14}). Account balance reconciliation with central servers, in some rapid transit systems like Seoul Metro and the proposed San Diego Metro are done at the end of calendar day \cite{a13,a15}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.96\textwidth]{figures/2-2.png}
+        \caption{Current AFC transaction flow}
+        \label{f22currentaafc}
+    \end{figure}
+    
+In the United States, the American Public Transportation Association (APTA) sets out a proprietary standard AFC transaction format called the Contactless Fare Media Standard (CFMS). Allen et al. \cite{a17} recounts that APTA CFMS uses XML as its messaging protocol, in which they regard as highly resource consuming as it exceeds 350 milliseconds to complete one transmission. Some systems solve this problem by temporarily retaining at the edge to cope with latency or network unavailability \cite{a4} then settling the held transactions later at the central system.
+
+\section{A Blockchain-based Toll Collection System for Public Sharing of Heterogeneous Edges \cite{a18}}
+
+Xiao, et al. \cite{a18} examines the possibility of incorporating edge computing and blockchain in toll payment system called EdgeToll whose architecture and flow are illustrated in Fig. \ref{f23et} and \ref{f24et}. In EdgeToll, both toll users and provider use some cryptocurrency over blockchain to transact. When a user performs payment, he/she connects to a payment edge then pay the service fees at the edge. Later stage of EdgeToll includes a proxy which matches user-side and edge-side to reduce operational ‘gas’ costs by moving payment channeling off-chain.
+
+	\begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{.44\textwidth}
+            \centering \includegraphics[width=0.99\linewidth]{figures/2-3.png}
+            \caption{EdgeToll Architecture \cite{a18}}
+            \label{f23et}
+        \end{subfigure} 
+        \begin{subfigure}[b]{.44\textwidth}
+            \centering \includegraphics[width=0.99\linewidth]{figures/2-4.png}
+            \caption{EdgeToll System Flow \cite{a18}}
+            \label{f24et}
+        \end{subfigure}
+        \label{f2324}
+    \end{figure}
+    
+\section{Price Elasticity in Beijing Subway \cite{a19}}
+
+In a journal article titled Study on the Price Elasticity of Demand of Beijing Subway \cite{a19}, Miao and Gao mention that with low fares and ever-growing passenger throughput in Beijing Subway, the Beijing government would suffer economic burden from maintaining the rapid transit system. Thus, they introduce a new elastic pricing scheme based on demand.
+
+\subsection{Basic Idea about Price Elasticity}
+The supply-and-demand law of economy influences price of goods and service. Seeing demand as an a priori, if demand increases, price increases and vice versa. Though, as a psychological effect of the supply-and-demand law, the law of demand applies. When price increases, demand decreases, and likewise, when price decreases, demand increases. Its curve is depicted in Figure \ref{f25}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.35\textwidth]{figures/2-5.png}
+        \caption{Law of Demand Graph \cite{a19}}
+        \label{f25}
+    \end{figure}
+    
+Miao and Gao further examine how much demand ($Q$) will change with respect to price ($P$) movement with a formula: price elasticity ($E$) equals $\Delta Q/ \Delta P$. Higher E implies higher demand volatility over a change of price. From here, a relation between price and demand can be derived: $Q = \alpha P^\epsilon$ where $\alpha$ is a constant and $\epsilon$ is price elasticity.
+
+Knowing price elasticity, an optimal revenue from adjusting price can be obtained from the following function: $R(P) = PQ = P\alpha P^\epsilon= \alpha P^{\epsilon+1}$. Therefore, revenue change $\DeltaR$ is equal to $R(P+\Delta P)/R(P) = (1+ \Delta P/P)^{\epsilon+1}$. Revenue increases when ($\Delta P > 0$ and $\epsilon > -1$) and ($\Delta P < 0$ and $\epsilon < -1$), price decreases otherwise. In conclusion, price increment will benefit merchant more when the price is elastic and decreasing price in elastic price increases revenue as well.
+
+\subsection{In the case of Beijing Subway Pricing}
+Fig. \ref{f26}. depicts the relationship between ticket price and passenger demand in Beijing Subway in three different timeframes: (1) 1991–1995, (2) 1996–2000, and (3) 2001–2008. The law of demand is observed in 1991–1995: elasticity equals -0.881 which means with price hike, demand decreases. In 1996–2000, ridership increases despite the increase in price (elasticity = 0.432 > 0). Miao and Gao argue that other socioeconomic factors such as living quality dampen the law’s prerequisite conditions. This effect amplifies towards the end of 2003–2008 era where price elasticity reaches 2.765 due to the opening of new subway lines, population boom, and the popularization of subway trips. Therefore, the law of demand may not be sufficient to measure demand change based on price alone: there is a need to consider other factors such as consumer trends.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.96\textwidth]{figures/2-6.png}
+        \caption{Relation curve between ridership and metro fare in Beijing Subway \cite{a19}}
+        \label{f26}
+    \end{figure}
+\subsection{Verdict}
+
+Previous works and situations regarding AFC and blockchain show how blockchain can leverage the benefits in running and managing AFC system by partially decentralizing data governance and minimizing attack source. Moreover, there is a possibility to build an effective dynamic pricing system by analyzing congestion big data fed from on-chain persistent data.
+
+More thorough, accurate, and precise information will replace this draft during the working of the research.
+
+\chapter{Background Knowledge}
+\label{cbknowledge}
+
+\section{Blockchain}
+\subsection{Overview}
+Blockchain is a growing peer-to-peer transaction record keeper in a form of a distributed ledger \cite{a7}. It equips encryption and stringent validation mechanisms in recording transactions and managing assets to ensure data integrity and security. As the name suggests, blockchain stores data in a form of blocks containing transaction details, hash of itself, and hash of the previous block, the latter used to make a linked list (‘chain’) of blocks (see Fig. \ref{f31}). Every party which participates in the network stores a copy of consensually agreed chain of blocks, hence the term “distributed ledger”.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.7\textwidth]{figures/3-1.png}
+        \caption{Blockchain structure}
+        \label{f31}
+    \end{figure}
+    
+Blocks are compiled and proposed by network participants called “nodes”. Depending on the consensus mechanism, on pushing a block onto the chain, a node may have to perform a complex mathematical computation \cite{a7}. In Bitcoin’s Proof-of-Work (PoW) consensus, for instance, a node is given task to find a value which gives a hash beginning with a particular number of zeroes; the first node which finds one gains the right to append the chain with its proposed block then receives some incentive \cite{a20}. Once a block is added onto the chain, no one can modify its content except majority nodes agree on marking the validity of the modified block and its successor blocks. Therefore, such method of validation guarantees transaction correctness when honest nodes have more computational power than attacker nodes \cite{a7}. 
+
+\subsection{Public, Private, and Permissioned Blockchain}
+
+Bitcoin and most cryptocurrencies operate under blockchain concept, benefiting from its security, accountability, decentralization, and semi-anonymity: characteristics of public blockchains. Anyone can join and perform transactions on public blockchain networks without permission from a central authority. However, in intra-organizational use cases, conventional public blockchain suffers from a massive flaw: it requires a substantial amount of resource to confirm transactions and append them into a new block by performing challenges defined by its consensus protocol; besides, there is a need for data privacy in conducting business: public blockchains disallow such requirement.
+
+Thus, there are types of blockchain networks that can accommodate privacy called private and permissioned blockchain. ‘Private’ and ‘permissioned’ blockchain, sometimes interchangeable, differ from public blockchain in several factors, namely: membership scope, and trust. Permissioned blockchain is mainly used in industries and businesses whose internal data needs to be transparent within a limited scope of parties. Only permissioned, white-listed nodes can participate in blockchain processes \cite{a21}; hence validating transactions needs not to be complex: by using Proof-of Authority (PoA) consensus approach. Contrary to PoW, in PoA, a node does not require any computational challenge to push a block onto a chain, rather, nodes selected by the authority of the blockchain can do so by proving its identity that shows the permission \cite{a5}. In this way, transaction speed is leveraged by much without compromising security factors.
+
+\subsection{Smart Contracts}
+
+Contracts are set of formal agreements between parties in conducting or establishing a relationship in personal, social, economic, and other fields. The agreements define roles, obligations, and rights of parties involved and determine actions to do in meeting a contract goal. Smart contracts are coded, automated contracts which are understandable by machines to run it with or without human intervention \cite{a22}.
+
+Current applications of smart contracts lie around automated payments and asset transfer, which Nick Szabo declares them fit the nature of blockchain \cite{a23}. Not only regarding trade, but smart contracts also support credential and data logging, asset tracking, supply chain \cite{a23}, or even as a helper tool in judicial decision. Some blockchain projects such as Ethereum support smart contracts in a form of executable programs in blocks. One can tell a participant node to run a smart contract program by initiating a transaction which then invokes the program inside \cite{a24}.
+
+\subsection{Decentralized Applications (dApps)}
+To expand blockchain’s capability beyond transactional and contractual matters, Cai, et al. \cite{a24} claims that decentralized applications (dApps) hosted inside blockchain are the ideal blockchain application: applications whose operations are independent from human control. Cai, et al. gives example dApp projects, one being a smart hotel IoT system where guests do not have to interact with humans in renting a room: they just pay hotel fees into a smart contract, and a room is reserved for them automatically.
+
+\section{Hyperledger \cite{a25}}
+Hyperledger project, hosted by The Linux Foundation since 2015, is an open source blockchain project aimed to provide a blockchain framework for corporates and individuals to develop their own blockchain applications. Hyperledger follows five strict characteristics:
+\begin{enumerate}
+\item Modular: working blocks are reusable and will not affect other parts of the system when modified,
+\item Highly secure: supported by openly reviewed protocols, algorithms, and cryptography,
+\item Interoperable with other networks and platforms,
+\item Independent from cryptocurrency: there will be no requirements of using tokens, and
+\item User-accessible and transparent API.
+\end{enumerate}
+
+\subsection{Hyperledger Fabric \cite{a25,a26}}
+Hyperledger Fabric is one of Hyperledger frameworks which focuses on deployment of modular distributed ledger for intra- and inter-industrial dApps. It follows a permissioned blockchain model where participants (peer and orderer nodes) are strictly appointed by a central network authority to reflect the management model in industries. Despite its strict access control mechanism, Hyperledger Fabric creates multi-channel network mechanism which enables stakeholders to segregate levels of shared information; as an illustration, when a company might want to share information about discounted prices to specific partners but not others, they can broadcast it in a separate channel from its main price-announcing channel. Refer to Fig. \ref{f32}. to view an example of Hyperledger Fabric’s system arrangement.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.96\textwidth]{figures/3-2.png}
+        \caption{Hyperledger Fabric Sample Network \cite{a26}}
+        \label{f32}
+    \end{figure}
+    
+Suppose four companies or entities share information with each other in a Hyperledger Fabric network $N$, namely $R1, R2, R3, and R4$. Imagine that $R4$ is the initiator of the network, thus $R4$ gains power to establish the first version of $N$ by introducing a network configuration $NC4$. In this scenario, $R1$ is appointed to be a co-curator of the network as well: it then governs $NC4$. $R4$ decides not to involve in business transactions in $N$; while $R1$ and $R2$ would like to have an exclusive communication channel between the two; as well as between $R2$ and $R3$. Therefore, $R1$ and $R2$ create and govern channel $C1$ and its configuration $CC1$. So do $R2$ and $R3$ with $C2$ and $CC2$. Each company $R1$, $R2$, and $R3$ then deploy their peer node, consecutively: $P1, P2,$ and $P3$. Since $R1$ and $R2$ share channel $C1$ with their peers $P1$ and $P2$, the peers keep a shared ledger $L1$ and smart contract $S5$; and ditto for $R2$ and $R3$ in channel $C2$. Note that because $P2$ belongs to channels $C1$ and $C2$, $P2$ keeps both $L1$ and $L2$ and can run $S5$ and $S6$. Transactions from any peer in $C1$ and $C2$ should be approved by ordering node $O4$ issued under $NC4$ before ledger change takes place. Next, suppose that each of $R1$, $R2$, and $R3$ wishes to deploy its own application $A1$, $A2$, or $A3$, the application will connect to their corresponding channel of choice. Finally, to prove organizational and component identities in a consensus mechanism, each company can define a certification authority ($CA$).
+
+\subsection{China’s Blockchain-based Service Network (BSN) \cite{a8,a27}}
+In 2019, The Government of People’s Republic of China initiated a national level blockchain platform rendered as Blockchain-based Service Network (BSN). It is an open Blockchain as a Service (BaaS) platform which allows blockchain developers from around the world to deploy dApps on, offering a complete set of development environment and resources. The network establishes public city nodes for developers to use for a low cost such that it would reach a wider customer target. BSN supports permissioned, permissionless, and interchain services; with Hyperledger Fabric as one of its supported permissioned blockchain platforms.
+
+\section{Methodology}
+The research consists of two parts: (1) establishing and scrutinizing a blockchain-backed AFC system and (2) making use data fed from blockchain for dynamic pricing application.
+\subsection{Part 1: Blockchain-backed AFC}
+In this part, a blockchain-based AFC will be built in the following sequence:
+\begin{enumerate}
+\item Performing literature review on how AFCs are implemented through textual resources,
+\item Obtaining smart card transaction dataset from an existing metro system,
+\item Simulating the working of traditional AFC system and record its performance,
+\item Constructing a novel AFC system, then
+\item Comparing both systems’ performance and qualitative advantages and disadvantages.
+
+The system to examine will consist of the following system blocks (tentative), see Fig. \ref{f33}:
+
+\begin{enumerate}
+\item Station control block, consisting of fare handling functions (control gates and top-up machines) as entities which initiate transactions. Several geographically proximate stations constitute a station agglomeration which connect to a common peer node,
+\item Peer node creates and proposes new transactions from stations to the blockchain. Each peer node houses two Hyperledger components:
+\begin{enumerate}
+\item Smart contract contains transaction logic which will execute upon a transaction request. Smart contracts are written in Node.js (tentative),
+\item Ledger: a copy of all transaction history from all stations and accounts, accompanied with a world state database,
+\end{enumerate}
+\item Channel: a communication grouping in which transaction data is shared with.
+\begin{enumerate}
+\item Private channel manages internal transaction records, and
+\item Public channel contains limited information sufficient for the public to access, view, and use,
+\end{enumerate}
+\item Orderer node: a validator node which accepts and endorses the creation of new transaction block using Raft consensus and Crash-Fault Tolerance consensus. May be embedded in some stations or inside the pseudo-central clearing house,
+\item Pseudo-central clearing house: a facility which accommodates node certification and identities of stakeholders of the system, and
+\item Public applications: set of applications open for public to build upon the data provided in the public channel, which will not be implemented in this research,
+\item Private applications: applications which serve internal business process such as station application (control gates, top-up machines) and in this research a dynamic pricing application which uses AFC data from the ledger to periodically control trip fares based on congestion level using Tensorflow.js deep learning library over Node.js.
+\end{enumerate}
+
+All blocks are under one integrated framework implemented in Linux’s Hyperledger Fabric. 
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.96\textwidth]{figures/3.png}
+        \caption{Proposed AFC system}
+        \label{f33}
+    \end{figure}
+    
+Here, the dataset is smart card passenger transaction data from Shanghai Metro\footnote{Downloadable from https://pan.baidu.com/s/1w31Hldfiu7dGUkEpCYXIVg, accessed 2021.04.11}  between 2015.04.01 to 2015.04.21 (around 280 million records). The .csv input data contains the categories in Table \ref{tdata}:
+
+\begin{table*}[]
+\caption{Sample metro data}
+\tbl{}{
+\label{tdata}
+\begin{tabular}{p{0.15\linewidth}p{0.17\linewidth}p{0.11\linewidth}p{0.23\linewidth}p{0.07\linewidth}p{0.03\linewidth}p{0.09\linewidth}}
+\textbf{Card Number} & \textbf{Transac. Date} & \textbf{Transac. Time} & \textbf{Station Name} & \textbf{Mode} & \textbf{Fare} & \textbf{Discount}\\ \hline
+3000953650 & 2015-04-11 & 15:14:03 & 7号线肇嘉浜路 & 地铁 & 4 & 非优惠 \\ \hline
+401456622 & 2015-04-11 & 09:45:42 & 2号线东昌路 & 地铁 & 7.2 & 优惠 \\ \hline
+2802424753 & 2015-04-11 & 15:29:13 & 2号线上海科技馆 & 地铁 & 0 & 非优惠 \\ \hline
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 
+
+\end{tabular}}
+\end{table*}
+
+%%%%%%%% put in fare: \footnote{Shanghai metro fares follow the formula $price\_in\_yuan = 3 + \lceil (distance\_in\_km – 6) / 10 \rceil$. After cross-checking with Shanghai Metro fare calculator at http://service.shmetro.com/en/cphc (accessed on 2021.04.26), the prices still apply.}
+
+Due to computing constraints, only a fraction of the whole data will enter the AFC system’s record. In an ideal case, recorded data in ledger would become a data source for the next part of the research: dynamic pricing; but, in this purpose, it is done just for the purpose of proving the work.
+
+\subsection{Part 2: An Example Blockchain Analytics Application: Dynamic Pricing Agent}
+
+Part 2 studies a potential dynamic pricing mechanism based on demand forecasting. An application containing a dynamic pricing model will fetch transaction data from private ledger to analyze using a simple machine learning model (in which it has not been decided at the meantime). However, because of resource limitation, data comes directly from the full raw .csv file. The process flow is as follows:
+
+\begin{enumerate}
+\item Data pre-processing:
+\begin{enumerate}
+\item Mark entry-exit based on fare breakdown: for each card number, the first and every odd record indicate entry, otherwise exit, 
+\item Adjust fractional price by the factor of 10/9 for every fractional fare indication to simplify calculation: this corresponds to Shanghai Metro’s 10\% discount policy,
+\item Add a “distance” attribute containing the calculation result of the following formulas:
+\begin{enumerate}
+\item For discounted price (优惠), distance = $6 +10 \times fare$,
+\item For non-discounted price (非优惠), distance = $6 +10 \times (fare – 3)$,
+\end{enumerate}
+\item Remove unnecessary columns: transportation mode and discount,
+\item Change post-midnight records from having “00” hour value to have “24” hour value to simplify sorting and visualization.
+\end{enumerate}
+
+\item Data discretization:
+\begin{enumerate}
+\item Separate exit and entry records,
+\item Record entry and exit times and day of week and discretize them in a 30-minute bin,
+\item Record fare distribution for each bin.
+\end{enumerate}
+
+\item Preliminary visualization. Visualize the relations between:
+\begin{enumerate}
+\item Entry/exit bin and number of passengers,
+\item Fare per distance distribution and number of passengers paying the rate,
+\item Fare per distance distribution and entry/exit time, and
+\item Total revenue per bin and fare.
+\end{enumerate}
+
+\item Observe if demand and fare per distance follow the demand law model, produce a fare per distance-demand equation,
+\item Using a particular machine learning model that will be decided later and the demand equation, find the optimal surge pricing that yields maximum revenue,
+\item Finally, push the new fare scheme back to the blockchain AFC system by updating the station gate application fare calculator.
+\end{enumerate}
 
 
 
