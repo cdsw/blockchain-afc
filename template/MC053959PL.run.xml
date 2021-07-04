@@ -41,14 +41,14 @@
   >
 ]>
 <requests version="1.0">
-  <internal package="biblatex" priority="9" active="1">
+  <internal package="biblatex" priority="9" active="0">
     <generic>latex</generic>
     <provides type="dynamic">
-      <file>main.aux</file>
-      <file>main-blx.bib</file>
+      <file>MC053959PL.aux</file>
+      <file>MC053959PL-blx.bib</file>
     </provides>
     <requires type="dynamic">
-      <file>main.bbl</file>
+      <file>MC053959PL.bbl</file>
     </requires>
     <requires type="static">
       <file>blx-dm.def</file>
@@ -66,25 +66,25 @@
       <file>english.lbx</file>
     </requires>
   </internal>
-  <external package="biblatex" priority="5" active="1">
+  <external package="biblatex" priority="5" active="0">
     <generic>bibtex</generic>
     <cmdline>
       <binary>bibtex</binary>
       <option>-min-crossrefs 2</option>
-      <infile>main</infile>
+      <infile>MC053959PL</infile>
     </cmdline>
     <input>
-      <file>main.aux</file>
+      <file>MC053959PL.aux</file>
     </input>
     <output>
-      <file>main.bbl</file>
+      <file>MC053959PL.bbl</file>
     </output>
     <provides type="dynamic">
-      <file>main.bbl</file>
+      <file>MC053959PL.bbl</file>
     </provides>
     <requires type="dynamic">
-      <file>main.aux</file>
-      <file>main-blx.bib</file>
+      <file>MC053959PL.aux</file>
+      <file>MC053959PL-blx.bib</file>
     </requires>
     <requires type="editable">
       <file>ref.bib</file>

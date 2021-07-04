@@ -26,8 +26,6 @@
 \usepackage{parskip}
 \usepackage[format=plain,font=it]{caption}
 
-
-
 \renewcommand\cftfigpresnum{Figure }
 \renewcommand\cftfigaftersnum{.}
 \addtolength{\cftfignumwidth}{35pt}
@@ -77,7 +75,9 @@
     \hfill \break \hfill \break
     {{\huge \centering \textbf{Abstract}\par}
     \hfill \break 
-    Studies regarding the application of blockchain in public services have been growing rapidly thanks to its decentralization, immutability, and transparency properties. Smart cities aim for more governance auditability and financial openness, both achievable by the mean of distributed ledgers and digital fund transfer. Adopting some analogies from already-studied blockchain-based toll collection systems, this research attempts to realize a blockchain-based automated fare collection in rapid transit systems using Hyperledger Fabric and scrutinize its feasibility. A dynamic pricing application built on the system acts as an example application which can help incentivizing transit operators in running the novel system.
+    Studies regarding the application of blockchain in public services have been growing rapidly thanks to its decentralization, immutability, and transparency properties. Smart cities aim for more governance auditability and financial openness, both achievable by the mean of distributed ledgers and digital fund transfer. Adopting some analogies from already-studied blockchain-based toll collection systems, this research attempts to realize a blockchain-based automated fare collection in rapid transit systems using Hyperledger Fabric and scrutinize its feasibility. The second part of this research showcases blockchain's capability in performing a streamlined, distributed deep learning in a form of blockchain-based federated learning (BFL). An example application which forecasts passenger flow is deployed to inspect the benefits of BFL compared to conventional centralized learning.
+
+%CONTINUE LATER
     }
 \end{titlepage}
 
@@ -108,28 +108,35 @@
 \label{cintro}
 \section{Brief Overview}\
 \label{sbriefov}
-   Rapid transit has been an essential component of popular urban transportation settings. In 2019 alone, Beijing Metro and Shanghai Metro each saw almost 4 billion annual rides \cite{a1} which may translate to 300–400 transactions per second. Normally, every ride requires a passenger to ‘tap in’ and ‘tap out’ a stored-value smart card or in-smartphone virtual card onto control gates given that the smart card has sufficient balance; the card balance is rechargeable through ticketing machines. One example is China’s T-Union smart card which works with public transport systems in 274 cities/regions and 5 other systems by 2019 \cite{a2}.
+   Rapid transit has been an essential component of popular urban transportation settings. In its peak in 2018, Hong Kong Metro alone records 4.715 million daily riderships, which may translate to 120--150 transactions per second \cite{hk1}. Normally, every ride requires a passenger to ‘tap in’ and ‘tap out’ a stored-value smart card or in-smartphone virtual card onto control gates given that the smart card has sufficient balance; the card balance is rechargeable through ticketing machines. One example is China’s T-Union smart card which works with public transport systems in 274 cities/regions and 5 other systems by 2019 \cite{a2}.
    
 Each smart card interaction with front-end devices (e.g., control gate, ticketing machine, mobile top-up application) triggers a transaction, which then is logged and recorded in the rail authority’s server. Currently, payments and logging are handled in traditional centralized servers and databases \cite{a3,a4} using the client-server architecture. Such conventional method of managing and storing data is prone to data compromise and loss due to lack of persistence and decentralized management \cite{a5}. Dang, et al. \cite{a6} shows an example attack which tries to alter transaction information by exploiting account–cloud data transmission.
 
 On the other hand, blockchain, a distributed ledger data structure, relies on full or partial decentralization, consensus, and secure cryptographic functions that assure trust, data immutability and persistence, and transparency \cite{a7}. Towards early 2020s, more and more companies and governmental bodies aim to adopt blockchain concept to their business and governance processes. One example is China’s national blockchain network initiative called Blockchain-based Service Network (BSN), a nationwide blockchain resource environment for public to develop blockchain applications on \cite{a8}.
 
-Running a blockchain network requires a significant resource even in a private blockchain, especially in a network as huge as a rapid transit system. More transaction implies increased resource demand; therefore, this research resurrects an idea of dynamic pricing in rapid transit to bring the company more incentive during peak hours and to entice passengers to take discounted non-peak-hour fare.
+
+%DELETE THE FOLLOWING
+%Running a typical blockchain network requires a significant resource even in a private blockchain, especially in a network as huge as a rapid transit system. More transaction implies increased resource demand; therefore, this research resurrects an idea of dynamic pricing in rapid transit to bring the company more incentive during peak hours and to entice passengers to take discounted non-peak-hour fare.
+
+%%%%%%%%%%%%%%%%% FOR FEDERATED FLEARNINGs
+% machine learning firdt
+
+% CACHING for what? || frequent user , some user if working they take the same route
 
 \section{Problem Description}
 \label{sprobdesc}
-This research will explore possible methods to tackle the issues of data stability, data analytics-compliance, and scalability in rapid transit AFC system with special focus to blockchain concept. Furthermore, there is an intention to assess the proposed system with respect to its compatibility to produce big data for data analytics applications, in this case, dynamic pricing. Three “S” factors serve as base benchmarks:
+This research will explore possible methods to tackle the issues of data stability, data analytics-compliance, and scalability in rapid transit AFC system with special focus to blockchain concept. Furthermore, a blockchain-based federated learning framework is observed as an enhancement and proof-of-applicability to the basic proposed AFC. Three “S” factors serve as base benchmarks:
 \begin{enumerate}
-\item \textbt{Stability}: measures availability and data persistence if there is fault in data-handling entities,
+\item \textbt{Stability}: measures availability, persistence, and correctness if there is fault in data-handling entities,
 \item \textbt{Searchability}: measures data completeness, correctness, and access convenience strictly for data analytics uses, and
 \item \textbt{Scalability}: measures system ability to adapt with requirement or capacity changes.
 \end{enumerate}
 
 \section{Motivation}
 \label{smotiv}
-The main motive behind migrating transit business process from conventional cloud to blockchain established around the recent rapid corporate and governmental adoption of blockchain as a new disruptive standard, though this is still in its infancy \cite{a9}. Switzerland, a blockchain proponent nation, has encouraged companies to implement businesses in blockchain by founding a “blockchain cluster” or a “Blockchain Valley” in the city of Zug \cite{a10}. China has also moved forward by building a national blockchain initiative called Blockchain Service Network (BSN) which serves any individual and corporate to build blockchain applications on \cite{a8}.
+The main motive behind migrating business process from conventional cloud to blockchain established around the recent rapid corporate and governmental adoption of blockchain as a new disruptive standard, though this is still in its infancy \cite{a9}. Switzerland, a blockchain proponent nation, has encouraged companies to implement businesses in blockchain by founding a “blockchain cluster” or a “Blockchain Valley” in the city of Zug \cite{a10}. China has also moved forward by building a national blockchain initiative called Blockchain Service Network (BSN) which serves any individual and corporate to build blockchain applications on \cite{a8}.
 
-Not only promoting data security, integrity, and system faultlessness, blockchain adoption also aligns with big data and artificial intelligence trend in a way that the three will support each other in producing new meaningful findings and data. In the case of rapid transit, persistent and transparent data allow private and public parties to perform data analytics, for instance, to predict peak hours or to maximize operation revenue by introducing a measured dynamic price. 
+Not only promoting data security, integrity, and system faultlessness, blockchain adoption also aligns with big data and artificial intelligence trend in a way that the three will support each other in producing new meaningful findings and data. In the case of rapid transit, persistent and transparent data allow private and public parties to perform data analytics, for instance, to associate a rider with his/her frequent entry and exit stations using caching. Passenger caching further accelerates data retrieval and amendment at station gates upon passenger's entry/exit.
 
 \section{Objectives and Scope}
 In brief, the ultimate outcome of this research is a novel blockchain-based rapid transit AFC backend that is stable, searchable, and scalable, alongside with a comparison between the proposed system with current AFC in the three benchmarks. The term ‘backend’ here refers to mechanisms of registering passenger trips, calculating each trip’s fare, storing, and retrieving trip details. Frontend functions such as smart card handler and ticket booking are beyond this research’s focus.
@@ -140,8 +147,8 @@ This experiment hypothesizes several advantages and disadvantages of the blockch
 \item Modularity and architecture openness of Hyperledger Fabric allows higher scalability, manageability, and adaptability to change compared to conventional proprietary, per-project AFC architectures,
 \item Immutable nature of blockchain records promotes correctness and auditability in such a way that also benefits data analytics in different levels (private and public uses),
 \item Blockchain-based AFC dampens the probability of attack due to transaction encryption, consensus, and trust mechanisms, unlike plain transaction-via-ethernet,
-\item Despite the prior advantages, this experiment expects a trade-off in performance due to blockchain’s more complex data entry mechanisms compared to conventional databases.
-\item Dynamic pricing based on demand analysis will deliver more revenue and reduce congestion; however, when calibrated and calculated improperly, this may result in customer dissatisfaction.
+\item Despite the prior advantages, this experiment expects a trade-off in performance due to blockchain’s more complex data entry mechanisms compared to conventional databases,
+\item Frequent passengers' data caching at stations speeds up fare calculation and balance update process.
 \end{enumerate}
 
 To limit the complex nature of developing such a system, this research will present a proof of work of blockchain-backed AFC backend using minimal architecture based on Linux’s Hyperledger Fabric and sufficient Node.js dynamic pricing program which will satisfy the three criteria defined in Section \ref{smotiv}.
@@ -164,7 +171,7 @@ Ultimately, a system-wide central clearing house (CCH) administers and gathers a
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.96\textwidth]{figures/2-1.png}
+        \includegraphics[width=.96\textwidth]{figures/tafc.pdf}
         \caption{Current AFC architecture}
         \label{f21currentaafc}
     \end{figure}
@@ -176,7 +183,7 @@ Beginning the trip, a passenger typically taps a transit card onto an RFID reade
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.96\textwidth]{figures/2-2.png}
+        \includegraphics[width=.96\textwidth]{figures/tafc2.pdf}
         \caption{Current AFC transaction flow}
         \label{f22currentaafc}
     \end{figure}
@@ -202,38 +209,10 @@ Xiao, et al. \cite{a18} examines the possibility of incorporating edge computing
         \label{f2324}
     \end{figure}
     
-\section{Price Elasticity in Beijing Subway \cite{a19}}
+\section{Blockchain-based Federated Learning for Edge Caching \cite{0a65}}
+% ADD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+this work titled ""
 
-In a journal article titled Study on the Price Elasticity of Demand of Beijing Subway \cite{a19}, Miao and Gao mention that with low fares and ever-growing passenger throughput in Beijing Subway, the Beijing government would suffer economic burden from maintaining the rapid transit system. Thus, they introduce a new elastic pricing scheme based on demand.
-
-\subsection{Basic Idea about Price Elasticity}
-The supply-and-demand law of economy influences price of goods and service. Seeing demand as an a priori, if demand increases, price increases and vice versa. Though, as a psychological effect of the supply-and-demand law, the law of demand applies. When price increases, demand decreases, and likewise, when price decreases, demand increases. Its curve is depicted in Figure \ref{f25}.
-
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=.35\textwidth]{figures/2-5.png}
-        \caption{Law of Demand Graph \cite{a19}}
-        \label{f25}
-    \end{figure}
-    
-Miao and Gao further examine how much demand ($Q$) will change with respect to price ($P$) movement with a formula: price elasticity ($E$) equals $\Delta Q/ \Delta P$. Higher E implies higher demand volatility over a change of price. From here, a relation between price and demand can be derived: $Q = \alpha P^\epsilon$ where $\alpha$ is a constant and $\epsilon$ is price elasticity.
-
-Knowing price elasticity, an optimal revenue from adjusting price can be obtained from the following function: $R(P) = PQ = P\alpha P^\epsilon= \alpha P^{\epsilon+1}$. Therefore, revenue change $\DeltaR$ is equal to $R(P+\Delta P)/R(P) = (1+ \Delta P/P)^{\epsilon+1}$. Revenue increases when ($\Delta P > 0$ and $\epsilon > -1$) and ($\Delta P < 0$ and $\epsilon < -1$), price decreases otherwise. In conclusion, price increment will benefit merchant more when the price is elastic and decreasing price in elastic price increases revenue as well.
-
-\subsection{In the case of Beijing Subway Pricing}
-Fig. \ref{f26}. depicts the relationship between ticket price and passenger demand in Beijing Subway in three different timeframes: (1) 1991–1995, (2) 1996–2000, and (3) 2001–2008. The law of demand is observed in 1991–1995: elasticity equals -0.881 which means with price hike, demand decreases. In 1996–2000, ridership increases despite the increase in price (elasticity = 0.432 > 0). Miao and Gao argue that other socioeconomic factors such as living quality dampen the law’s prerequisite conditions. This effect amplifies towards the end of 2003–2008 era where price elasticity reaches 2.765 due to the opening of new subway lines, population boom, and the popularization of subway trips. Therefore, the law of demand may not be sufficient to measure demand change based on price alone: there is a need to consider other factors such as consumer trends.
-
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=.96\textwidth]{figures/2-6.png}
-        \caption{Relation curve between ridership and metro fare in Beijing Subway \cite{a19}}
-        \label{f26}
-    \end{figure}
-\subsection{Verdict}
-
-Previous works and situations regarding AFC and blockchain show how blockchain can leverage the benefits in running and managing AFC system by partially decentralizing data governance and minimizing attack source. Moreover, there is a possibility to build an effective dynamic pricing system by analyzing congestion big data fed from on-chain persistent data.
-
-More thorough, accurate, and precise information will replace this draft during the working of the research.
 
 \chapter{Background Knowledge}
 \label{cbknowledge}
@@ -291,8 +270,12 @@ Suppose four companies or entities share information with each other in a Hyperl
 \subsection{China’s Blockchain-based Service Network (BSN) \cite{a8,a27}}
 In 2019, The Government of People’s Republic of China initiated a national level blockchain platform rendered as Blockchain-based Service Network (BSN). It is an open Blockchain as a Service (BaaS) platform which allows blockchain developers from around the world to deploy dApps on, offering a complete set of development environment and resources. The network establishes public city nodes for developers to use for a low cost such that it would reach a wider customer target. BSN supports permissioned, permissionless, and interchain services; with Hyperledger Fabric as one of its supported permissioned blockchain platforms.
 
+\subsection{Federated Learning}
+%ABOUT FED LEARNING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \section{Methodology}
-The research consists of two parts: (1) establishing and scrutinizing a blockchain-backed AFC system and (2) making use data fed from blockchain for dynamic pricing application.
+The research consists of two parts: (1) establishing and scrutinizing a blockchain-backed AFC system and (2) making use of data fed from blockchain for passenger caching.
 \subsection{Part 1: Blockchain-backed AFC}
 In this part, a blockchain-based AFC will be built in the following sequence:
 \begin{enumerate}
@@ -326,19 +309,19 @@ All blocks are under one integrated framework implemented in Linux’s Hyperledg
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.96\textwidth]{figures/3.png}
+        \includegraphics[width=.96\textwidth]{figures/bafc-main.pdf}
         \caption{Proposed AFC system}
         \label{f33}
     \end{figure}
     
-Here, the dataset is smart card passenger transaction data from Shanghai Metro\footnote{Downloadable from https://pan.baidu.com/s/1w31Hldfiu7dGUkEpCYXIVg, accessed 2021.04.11}  between 2015.04.01 to 2015.04.21 (around 280 million records). The .csv input data contains the categories in Table \ref{tdata}:
+Here, the dataset comes from smart card passenger transaction data of Shanghai Metro\footnote{Downloadable from https://pan.baidu.com/s/1w31Hldfiu7dGUkEpCYXIVg, accessed 2021.04.11} between 2015.04.01 to 2015.04.21 (around 280 million records). The .csv input data contains the categories in Table \ref{tdata}:
 
 \begin{table*}[]
 \caption{Sample metro data}
 \tbl{}{
 \label{tdata}
-\begin{tabular}{p{0.15\linewidth}p{0.17\linewidth}p{0.11\linewidth}p{0.23\linewidth}p{0.07\linewidth}p{0.03\linewidth}p{0.09\linewidth}}
-\textbf{Card Number} & \textbf{Transac. Date} & \textbf{Transac. Time} & \textbf{Station Name} & \textbf{Mode} & \textbf{Fare} & \textbf{Discount}\\ \hline
+\begin{tabular}{p{0.15\linewidth}p{0.15\linewidth}p{0.11\linewidth}p{0.23\linewidth}p{0.07\linewidth}p{0.05\linewidth}p{0.09\linewidth}}
+\textbf{Card Number} & \textbf{Transac. Date} & \textbf{Transac. Time} & \textbf{Station Name} & \textbf{Mode} & \textbf{Fare\footnotemark} & \textbf{Discount}\\ \hline
 3000953650 & 2015-04-11 & 15:14:03 & 7号线肇嘉浜路 & 地铁 & 4 & 非优惠 \\ \hline
 401456622 & 2015-04-11 & 09:45:42 & 2号线东昌路 & 地铁 & 7.2 & 优惠 \\ \hline
 2802424753 & 2015-04-11 & 15:29:13 & 2号线上海科技馆 & 地铁 & 0 & 非优惠 \\ \hline
@@ -346,53 +329,28 @@ Here, the dataset is smart card passenger transaction data from Shanghai Metro\f
 
 \end{tabular}}
 \end{table*}
+\footnotetext{Shanghai metro fares follow the formula $price\_in\_yuan = 3 + \lceil (distance\_in\_km – 6) / 10 \rceil$. After cross-checking with Shanghai Metro fare calculator at http://service.shmetro.com/en/cphc (accessed on 2021.04.26), the prices still apply.}
 
-%%%%%%%% put in fare: \footnote{Shanghai metro fares follow the formula $price\_in\_yuan = 3 + \lceil (distance\_in\_km – 6) / 10 \rceil$. After cross-checking with Shanghai Metro fare calculator at http://service.shmetro.com/en/cphc (accessed on 2021.04.26), the prices still apply.}
+Due to computing constraints, only a fraction of the whole data will enter the AFC system’s record. In an ideal case, recorded data in ledger would become a data source for the next part of the research: passenger caching; but, in this purpose, it is done just for the purpose of proving the work.
 
-Due to computing constraints, only a fraction of the whole data will enter the AFC system’s record. In an ideal case, recorded data in ledger would become a data source for the next part of the research: dynamic pricing; but, in this purpose, it is done just for the purpose of proving the work.
+\subsection{Part 2: Blockchain-based Federated Learning (BFL)-assisted Caching}
 
-\subsection{Part 2: An Example Blockchain Analytics Application: Dynamic Pricing Agent}
+Part 2 examines if the novel AFC can support a passenger caching mechanism to store frequent passengers' latest record in cache for faster data access. Federated Learning (FL) serves as the caching method. This subsystem uses another channel and smart contract set in Hyperledger Fabric. However, because of resource limitation, only a subset of the dataset is used.
 
-Part 2 studies a potential dynamic pricing mechanism based on demand forecasting. An application containing a dynamic pricing model will fetch transaction data from private ledger to analyze using a simple machine learning model (in which it has not been decided at the meantime). However, because of resource limitation, data comes directly from the full raw .csv file. The process flow is as follows:
+Consulting Fig. \ref{f33a}, the caching system occupies another Hyperledger channel of the same network. Each station has a common cache
 
-\begin{enumerate}
-\item Data pre-processing:
-\begin{enumerate}
-\item Mark entry-exit based on fare breakdown: for each card number, the first and every odd record indicate entry, otherwise exit, 
-\item Adjust fractional price by the factor of 10/9 for every fractional fare indication to simplify calculation: this corresponds to Shanghai Metro’s 10\% discount policy,
-\item Add a “distance” attribute containing the calculation result of the following formulas:
-\begin{enumerate}
-\item For discounted price (优惠), distance = $6 +10 \times fare$,
-\item For non-discounted price (非优惠), distance = $6 +10 \times (fare – 3)$,
-\end{enumerate}
-\item Remove unnecessary columns: transportation mode and discount,
-\item Change post-midnight records from having “00” hour value to have “24” hour value to simplify sorting and visualization.
-\end{enumerate}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.96\textwidth]{figures/bafc-main.pdf}
+        \caption{Caching extension to the proposed AFC system: schematic}
+        \label{f33a}
+    \end{figure}
 
-\item Data discretization:
-\begin{enumerate}
-\item Separate exit and entry records,
-\item Record entry and exit times and day of week and discretize them in a 30-minute bin,
-\item Record fare distribution for each bin.
-\end{enumerate}
-
-\item Preliminary visualization. Visualize the relations between:
-\begin{enumerate}
-\item Entry/exit bin and number of passengers,
-\item Fare per distance distribution and number of passengers paying the rate,
-\item Fare per distance distribution and entry/exit time, and
-\item Total revenue per bin and fare.
-\end{enumerate}
-
-\item Observe if demand and fare per distance follow the demand law model, produce a fare per distance-demand equation,
-\item Using a particular machine learning model that will be decided later and the demand equation, find the optimal surge pricing that yields maximum revenue,
-\item Finally, push the new fare scheme back to the blockchain AFC system by updating the station gate application fare calculator.
-\end{enumerate}
+%steps
 
 
 
-
-
+%further work: on buses (mobile BFL)
 
 
 
