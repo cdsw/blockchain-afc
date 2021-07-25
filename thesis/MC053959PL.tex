@@ -75,7 +75,7 @@
     \hfill \break \hfill \break
     {{\huge \centering \textbf{Abstract}\par}
     \hfill \break 
-    Studies regarding the application of blockchain in public services have been growing rapidly thanks to its decentralization, immutability, and transparency properties. Smart cities aim for more governance auditability and financial openness, both achievable by the mean of distributed ledgers and digital fund transfer. Adopting some analogies from already-studied blockchain-based toll collection systems, this research attempts to realize a blockchain-based automated fare collection in rapid transit systems using Hyperledger Fabric and scrutinize its feasibility. The second part of this research showcases blockchain's capability in performing a streamlined, distributed deep learning in a form of blockchain-based federated learning (BFL). An example application which forecasts passenger flow is deployed to inspect the benefits of BFL compared to conventional centralized learning.
+    Studies regarding the application of blockchain in public services have been growing rapidly thanks to its decentralization, immutability, and transparency properties. Smart cities aim for more governance auditability and financial openness, both achievable by the mean of distributed ledgers and digital fund transfer. Adopting some analogies from already-studied blockchain-based toll collection systems, this research attempts to realize a blockchain-based automated fare collection in rapid transit systems using Hyperledger Fabric and scrutinize its feasibility. The second part of this research showcases blockchain's capability in performing a streamlined, distributed deep learning in a form of blockchain-based federated learning (BFL). An example application which forecasts short-term passenger flow is deployed to inspect the benefits of BFL compared to conventional centralized learning.
 
 %CONTINUE LATER
     }
@@ -106,37 +106,61 @@
 %---------EVERY PAGE/SECTION SHOULD CONTAIN A REFERENCE.
 \chapter{Introduction}
 \label{cintro}
-\section{Brief Overview}\
+\section{Background}\
 \label{sbriefov}
-   Rapid transit has been an essential component of popular urban transportation settings. In its peak in 2018, Hong Kong Metro alone records 4.715 million daily riderships, which may translate to 120--150 transactions per second \cite{hk1}. Normally, every ride requires a passenger to ‘tap in’ and ‘tap out’ a stored-value smart card or in-smartphone virtual card onto control gates given that the smart card has sufficient balance; the card balance is rechargeable through ticketing machines. One example is China’s T-Union smart card which works with public transport systems in 274 cities/regions and 5 other systems by 2019 \cite{a2}.
-   
-Each smart card interaction with front-end devices (e.g., control gate, ticketing machine, mobile top-up application) triggers a transaction, which then is logged and recorded in the rail authority’s server. Currently, payments and logging are handled in traditional centralized servers and databases \cite{a3,a4} using the client-server architecture. Such conventional method of managing and storing data is prone to data compromise and loss due to lack of persistence and decentralized management \cite{a5}. Dang, et al. \cite{a6} shows an example attack which tries to alter transaction information by exploiting account–cloud data transmission.
+% PART 1 HISTORY: RAPID TRANSIT, AFC
+Rapid transit has been an essential component of popular urban transportation settings. In its peak in 2018, Hong Kong Metro alone recorded 4.715 million daily riderships, which may translate to 120--150 transactions per second \cite{y71}. 
+Each rapid transit system implements a ticketing system named ``fare collection''. Fare collection systems handle ticket issuance, fare calculation and payment, as well as trip logging. To simplify the process, fare collection is digitized into an automated fare collection (AFC) \cite{p11}.
+Normally, every ride requires a passenger to ‘tap in’ and ‘tap out’ a stored-value smart card or in-smartphone virtual card onto control gates given that the smart card has sufficient balance; the card balance is rechargeable through ticketing machines. One example is China’s T-Union smart card which works with public transport systems in 274 cities/regions and 5 other systems by 2019 \cite{y2}.
 
-On the other hand, blockchain, a distributed ledger data structure, relies on full or partial decentralization, consensus, and secure cryptographic functions that assure trust, data immutability and persistence, and transparency \cite{a7}. Towards early 2020s, more and more companies and governmental bodies aim to adopt blockchain concept to their business and governance processes. One example is China’s national blockchain network initiative called Blockchain-based Service Network (BSN), a nationwide blockchain resource environment for public to develop blockchain applications on \cite{a8}.
+% PART 2 SMART CARD LOGGING   
+Each smart card interaction with front-end devices (e.g., control gate, ticketing machine, mobile top-up application) triggers a transaction, which then is logged and recorded in the rail authority’s server. Currently, payments and logging are handled in traditional centralized servers and databases \cite{p67,p4} using the client-server architecture. Such conventional method of managing and storing data is prone to data compromise and loss due to lack of persistence and decentralized management \cite{y44}. Dang, et al. \cite{a6} shows an example attack which tries to alter transaction information by exploiting account–cloud data transmission. In the more extreme case, in January 2021 \cite{y500}, Pakistan Railways' e-ticketing collapsed from a hacker's attack which resulted in server unavailability and data breach.
 
 
-%DELETE THE FOLLOWING
-%Running a typical blockchain network requires a significant resource even in a private blockchain, especially in a network as huge as a rapid transit system. More transaction implies increased resource demand; therefore, this research resurrects an idea of dynamic pricing in rapid transit to bring the company more incentive during peak hours and to entice passengers to take discounted non-peak-hour fare.
+% PART 3 BLOCKCHAIN
+Blockchain, a distributed ledger data structure, comes to solve security and trust problems. The cornerstone of Blockchain technology came from Satoshi Nakamoto \cite{s7} with his project called Bitcoin, a cryptocurrency. Blockchain relies on full or partial decentralization, consensus, and secure cryptographic functions that assure trust, data immutability and persistence, consistency, and transparency \cite{y40,y43}. While the popular use of blockchain still hover around cryptocurrency and payment \cite{y44}, blockchain can also serve other applications like information exchange, resource management \cite{y40}, etc. Towards early 2020s, more and more companies and governmental bodies aim to adopt blockchain concept to their business and governance processes. One example is China’s national blockchain network initiative called Blockchain-based Service Network (BSN), a nationwide blockchain resource environment for public to develop blockchain applications on \cite{y8}. Monetary Authority of Singapore takes another step by aiming to develop a ledger-based cross-border payment \cite{y72}.
+
+% PART 4 BC-AFC
+AFC highly relates with storage of data which requires high level of security and consistency, i.e. transaction log and identity management. Blockchain can greatly minimize the success rate of such attack by conforming to some consensus mechanism as strong as or stronger than Byzantine Fault Tolerance (BFT) \cite{y40}. BFT itself derives from the work of Lamport et al. \cite{s}'s Byzantine General Problem, where it requires a system to have at least $3n + 1$ processing nodes, given $n$ failures \cite{s16}. Data tampering in logs and transactions, unintentionally or intentionally, is a threat to the truth of information which inhibits accurate audit; thus, blockchain's immutability and consensus can solve such issue in log systems\cite{n1}.
+
+% ADD CITATED WORKS REGARDING LOGS HERE
+
 
 %%%%%%%%%%%%%%%%% FOR FEDERATED FLEARNINGs
 % machine learning firdt
 
-% CACHING for what? || frequent user , some user if working they take the same route
+% short-term passenger flow
+
 
 \section{Problem Description}
 \label{sprobdesc}
-This research will explore possible methods to tackle the issues of data stability, data analytics-compliance, and scalability in rapid transit AFC system with special focus to blockchain concept. Furthermore, a blockchain-based federated learning framework is observed as an enhancement and proof-of-applicability to the basic proposed AFC. Three “S” factors serve as base benchmarks:
+This research consists of two major parts:
 \begin{enumerate}
-\item \textbt{Stability}: measures availability, persistence, and correctness if there is fault in data-handling entities,
-\item \textbt{Searchability}: measures data completeness, correctness, and access convenience strictly for data analytics uses, and
-\item \textbt{Scalability}: measures system ability to adapt with requirement or capacity changes.
+	\item Part 1: Blockchainization of AFC
+	\item Part 2: A small short-term passenger flow prediction using federated learning in blockchain.
+\end{enumerate}
+
+% problem with centralized - what is known? cite some works 
+
+This research will explore possible methods to tackle the issues of data stability, data analytics-compliance, and scalability in rapid transit AFC system with special focus to blockchain concept. Furthermore, a blockchain-based federated learning framework is observed as an enhancement and proof-of-applicability to the basic proposed AFC. Three ``S'' factors serve as base benchmarks:
+\begin{enumerate}
+\item \textbf{Stability}: measures availability, persistence, and correctness if there is fault in data-handling entities,
+\item \textbf{Searchability}: measures data completeness, correctness, and access convenience strictly for data analytics uses, and
+\item \textbf{Scalability}: measures system ability to adapt with requirement or capacity changes.
 \end{enumerate}
 
 \section{Motivation}
 \label{smotiv}
-The main motive behind migrating business process from conventional cloud to blockchain established around the recent rapid corporate and governmental adoption of blockchain as a new disruptive standard, though this is still in its infancy \cite{a9}. Switzerland, a blockchain proponent nation, has encouraged companies to implement businesses in blockchain by founding a “blockchain cluster” or a “Blockchain Valley” in the city of Zug \cite{a10}. China has also moved forward by building a national blockchain initiative called Blockchain Service Network (BSN) which serves any individual and corporate to build blockchain applications on \cite{a8}.
+The main motive behind migrating business process from conventional cloud to blockchain established around the recent rapid corporate and governmental adoption of blockchain as a new disruptive standard, though this is still in its infancy \cite{y41}. Switzerland, a blockchain proponent nation, has encouraged companies to implement businesses in blockchain by founding a ``blockchain cluster'' or a ``Blockchain Valley'' in the city of Zug \cite{y42}. China has also moved forward by building a national blockchain initiative called Blockchain Service Network (BSN) which serves any individual and corporate to build blockchain applications on \cite{y8}.
 
 Not only promoting data security, integrity, and system faultlessness, blockchain adoption also aligns with big data and artificial intelligence trend in a way that the three will support each other in producing new meaningful findings and data. In the case of rapid transit, persistent and transparent data allow private and public parties to perform data analytics, for instance, to associate a rider with his/her frequent entry and exit stations using caching. Passenger caching further accelerates data retrieval and amendment at station gates upon passenger's entry/exit.
+
+
+% Why it matters: 
+    %How will resolving the problem advance understanding of the topic?
+    %What benefits will it have for future research?
+    %Does the problem have direct or indirect consequences for society?
+
 
 \section{Objectives and Scope}
 In brief, the ultimate outcome of this research is a novel blockchain-based rapid transit AFC backend that is stable, searchable, and scalable, alongside with a comparison between the proposed system with current AFC in the three benchmarks. The term ‘backend’ here refers to mechanisms of registering passenger trips, calculating each trip’s fare, storing, and retrieving trip details. Frontend functions such as smart card handler and ticket booking are beyond this research’s focus.
@@ -159,15 +183,15 @@ To limit the complex nature of developing such a system, this research will pres
 \subsection{Overview of AFC}
 Automated fare collection (AFC) is a function in rapid transit system which handles ticket lifetime management, fund storage, fare collection, and transaction execution and storage in a semi-automatic manner. The following subsections will describe the operation of current AFC systems in several parts of the world.
 \subsection{AFC Architecture}
-Typical AFCs consist of electronic ticket cards (‘cards’), ticket machines, passenger control gates (‘gates’), and backend system \cite{a11}, see Fig. \ref{f21currentaafc}. An electronic transit card is a payment media of an AFC system which may or may not map to a transit account. Cards are usually in a form of RFID stored-value smart cards whose balance is refillable through ticket machines and are issued from ticket machines.
+Typical AFCs consist of electronic ticket cards (‘cards’), ticket machines, passenger control gates (‘gates’), and backend system \cite{p11}, see Fig. \ref{f21currentaafc}. An electronic transit card is a payment media of an AFC system which may or may not map to a transit account. Cards are usually in a form of RFID stored-value smart cards whose balance is refillable through ticket machines and are issued from ticket machines.
 
-Based on cards’ scope of usage, there are two types of fare media: closed-loop system in which proprietary cards work only in one or limited number of transit systems; and open-loop system where general-use cards issued by external authorities, e.g., contactless bank card, can be used as a fare media \cite{a12,a13}. Closed-loop system is more optimal when a rapid transit company prioritizes speed, extensive fare rule customization, and autonomous management, while open-loop system aims to boost interoperability with other fare media and lowering costs to produce proprietary cards \cite{a14}.
+Based on cards’ scope of usage, there are two types of fare media: closed-loop system in which proprietary cards work only in one or limited number of transit systems; and open-loop system where general-use cards issued by external authorities, e.g., contactless bank card, can be used as a fare media \cite{p12,p13}. Closed-loop system is more optimal when a rapid transit company prioritizes speed, extensive fare rule customization, and autonomous management, while open-loop system aims to boost interoperability with other fare media and lowering costs to produce proprietary cards \cite{p14}.
 
-Some cards are in the form of virtually installed in Near Field Communication (NFC)-enabled phone, issued and rechargeable through a mobile application \cite{a13,a15}. Account-based passenger card registrar system is getting more popular due to its flexibility in usage and management. Such system avoids storing balance information inside cards but inside a central database, therefore promoting flexibility in service variation, fare policies, and effective validation \cite{a13}.
+Some cards are in the form of virtually installed in Near Field Communication (NFC)-enabled phone, issued and rechargeable through a mobile application \cite{p13,p63}. Account-based passenger card registrar system is getting more popular due to its flexibility in usage and management. Such system avoids storing balance information inside cards but inside a central database, therefore promoting flexibility in service variation, fare policies, and effective validation \cite{p13}.
 
-Passenger control gate registers and logs transactions arising from passengers’ entry and exit through its card readers. Gates are also in charge of calculating fares based on passengers’ trip and fare structure, except in some real-time account-based system where fare processing is performed in the back office \cite{a15}. These devices exchange data with a station control inside a station through a telecommunication backbone network such as ethernet, optical cable, and/or internet. Station control contains servers and databases which manages the overall AFC operation and logging transaction and trip details of the station \cite{a4,a16}. 
+Passenger control gate registers and logs transactions arising from passengers’ entry and exit through its card readers. Gates are also in charge of calculating fares based on passengers’ trip and fare structure, except in some real-time account-based system where fare processing is performed in the back office \cite{p63}. These devices exchange data with a station control inside a station through a telecommunication backbone network such as ethernet, optical cable, and/or internet. Station control contains servers and databases which manages the overall AFC operation and logging transaction and trip details of the station \cite{p4,p16}. 
 
-Ultimately, a system-wide central clearing house (CCH) administers and gathers all stations’ AFC business, account identities, and communicate with external supporting services such as banks and transit operators \cite{a4,a11} to settle financial clearing and to provide data to concerning parties \cite{a13,a15,a18}. As the term CCH implies, all management systems are centralized in a single host \cite{a4,a15}.
+Ultimately, a system-wide central clearing house (CCH) administers and gathers all stations’ AFC business, account identities, and communicate with external supporting services such as banks and transit operators \cite{p4,p11} to settle financial clearing and to provide data to concerning parties \cite{p13,p63,n18}. As the term CCH implies, all management systems are centralized in a single host \cite{p4,p63}.
 
     \begin{figure}[H]
         \centering
@@ -179,7 +203,7 @@ Ultimately, a system-wide central clearing house (CCH) administers and gathers a
 \subsection{Transaction Flow}
 In general, two cases of fund transfer constitute transactions in AFC: card top-up and fare payment. Card top-up adds monetary value to account balance associated with the card spendable for transit fares. Fare payment consists of three major steps: entrance, exit, and settlement. Refer to Fig. \ref{f22currentaafc}. 
 
-Beginning the trip, a passenger typically taps a transit card onto an RFID reader on an entrance gate. A computing device in the gate checks the card’s validity, including scrutinizing card number, the expiration, and the balance. Given that passenger taps a legitimate card, gate records the entrance both to the server’s metro data file and into the card, then opens the gate for passenger to begin the trip \cite{a6}. Upon exit, the exit gate performs identical validation and recording, calculates the fare based on fare structure, updates card balance inside the card and the server, then opens the gate \cite{a13}. Fund deduction and settlement are usually done offline to avoid users waiting too long for gate to open (i.e., more than 500 milliseconds \cite{a14}). Account balance reconciliation with central servers, in some rapid transit systems like Seoul Metro and the proposed San Diego Metro are done at the end of calendar day \cite{a13,a15}.
+Beginning the trip, a passenger typically taps a transit card onto an RFID reader on an entrance gate. A computing device in the gate checks the card’s validity, including scrutinizing card number, the expiration, and the balance. Given that passenger taps a legitimate card, gate records the entrance both to the server’s metro data file and into the card, then opens the gate for passenger to begin the trip \cite{a6}. Upon exit, the exit gate performs identical validation and recording, calculates the fare based on fare structure, updates card balance inside the card and the server, then opens the gate \cite{p13}. Fund deduction and settlement are usually done offline to avoid users waiting too long for gate to open (i.e., more than 500 milliseconds \cite{p14}). Account balance reconciliation with central servers, in some rapid transit systems like Seoul Metro and the proposed San Diego Metro are done at the end of calendar day \cite{p13,p63}.
 
     \begin{figure}[H]
         \centering
@@ -188,28 +212,28 @@ Beginning the trip, a passenger typically taps a transit card onto an RFID reade
         \label{f22currentaafc}
     \end{figure}
     
-In the United States, the American Public Transportation Association (APTA) sets out a proprietary standard AFC transaction format called the Contactless Fare Media Standard (CFMS). Allen et al. \cite{a17} recounts that APTA CFMS uses XML as its messaging protocol, in which they regard as highly resource consuming as it exceeds 350 milliseconds to complete one transmission. Some systems solve this problem by temporarily retaining at the edge to cope with latency or network unavailability \cite{a4} then settling the held transactions later at the central system.
+In the United States, the American Public Transportation Association (APTA) sets out a proprietary standard AFC transaction format called the Contactless Fare Media Standard (CFMS). Allen et al. \cite{p17} recounts that APTA CFMS uses XML as its messaging protocol, in which they regard as highly resource consuming as it exceeds 350 milliseconds to complete one transmission. Some systems solve this problem by temporarily retaining at the edge to cope with latency or network unavailability \cite{p4} then settling the held transactions later at the central system.
 
-\section{A Blockchain-based Toll Collection System for Public Sharing of Heterogeneous Edges \cite{a18}}
+\section{A Blockchain-based Toll Collection System for Public Sharing of Heterogeneous Edges \cite{n18}}
 
-Xiao, et al. \cite{a18} examines the possibility of incorporating edge computing and blockchain in toll payment system called EdgeToll whose architecture and flow are illustrated in Fig. \ref{f23et} and \ref{f24et}. In EdgeToll, both toll users and provider use some cryptocurrency over blockchain to transact. When a user performs payment, he/she connects to a payment edge then pay the service fees at the edge. Later stage of EdgeToll includes a proxy which matches user-side and edge-side to reduce operational ‘gas’ costs by moving payment channeling off-chain.
+Xiao, et al. \cite{n18} examines the possibility of incorporating edge computing and blockchain in toll payment system called EdgeToll whose architecture and flow are illustrated in Fig. \ref{f23et} and \ref{f24et}. In EdgeToll, both toll users and provider use some cryptocurrency over blockchain to transact. When a user performs payment, he/she connects to a payment edge then pay the service fees at the edge. Later stage of EdgeToll includes a proxy which matches user-side and edge-side to reduce operational ‘gas’ costs by moving payment channeling off-chain.
 
 	\begin{figure}[H]
         \centering
         \begin{subfigure}[b]{.44\textwidth}
             \centering \includegraphics[width=0.99\linewidth]{figures/2-3.png}
-            \caption{EdgeToll Architecture \cite{a18}}
+            \caption{EdgeToll Architecture \cite{n18}}
             \label{f23et}
         \end{subfigure} 
         \begin{subfigure}[b]{.44\textwidth}
             \centering \includegraphics[width=0.99\linewidth]{figures/2-4.png}
-            \caption{EdgeToll System Flow \cite{a18}}
+            \caption{EdgeToll System Flow \cite{n18}}
             \label{f24et}
         \end{subfigure}
         \label{f2324}
     \end{figure}
     
-\section{Blockchain-based Federated Learning for Edge Caching \cite{0a65}}
+\section{------------------------------------------------------}
 % ADD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 this work titled ""
 
@@ -219,7 +243,7 @@ this work titled ""
 
 \section{Blockchain}
 \subsection{Overview}
-Blockchain is a growing peer-to-peer transaction record keeper in a form of a distributed ledger \cite{a7}. It equips encryption and stringent validation mechanisms in recording transactions and managing assets to ensure data integrity and security. As the name suggests, blockchain stores data in a form of blocks containing transaction details, hash of itself, and hash of the previous block, the latter used to make a linked list (‘chain’) of blocks (see Fig. \ref{f31}). Every party which participates in the network stores a copy of consensually agreed chain of blocks, hence the term “distributed ledger”.
+Blockchain is a growing peer-to-peer transaction record keeper in a form of a distributed ledger \cite{y43}. It equips encryption and stringent validation mechanisms in recording transactions and managing assets to ensure data integrity and security. As the name suggests, blockchain stores data in a form of blocks containing transaction details, hash of itself, and hash of the previous block, the latter used to make a linked list (‘chain’) of blocks (see Fig. \ref{f31}). Every party which participates in the network stores a copy of consensually agreed chain of blocks, hence the term ``distributed ledger''.
 
     \begin{figure}[H]
         \centering
@@ -228,24 +252,24 @@ Blockchain is a growing peer-to-peer transaction record keeper in a form of a di
         \label{f31}
     \end{figure}
     
-Blocks are compiled and proposed by network participants called “nodes”. Depending on the consensus mechanism, on pushing a block onto the chain, a node may have to perform a complex mathematical computation \cite{a7}. In Bitcoin’s Proof-of-Work (PoW) consensus, for instance, a node is given task to find a value which gives a hash beginning with a particular number of zeroes; the first node which finds one gains the right to append the chain with its proposed block then receives some incentive \cite{a20}. Once a block is added onto the chain, no one can modify its content except majority nodes agree on marking the validity of the modified block and its successor blocks. Therefore, such method of validation guarantees transaction correctness when honest nodes have more computational power than attacker nodes \cite{a7}. 
+Blocks are compiled and proposed by network participants called ``nodes''. Depending on the consensus mechanism, on pushing a block onto the chain, a node may have to perform a complex mathematical computation \cite{y43}. In Bitcoin’s Proof-of-Work (PoW) consensus, for instance, a node is given task to find a value which gives a hash beginning with a particular number of zeroes; the first node which finds one gains the right to append the chain with its proposed block then receives some incentive \cite{s7}. Once a block is added onto the chain, no one can modify its content except majority nodes agree on marking the validity of the modified block and its successor blocks. Therefore, such method of validation guarantees transaction correctness when honest nodes have more computational power than attacker nodes \cite{y43}. 
 
 \subsection{Public, Private, and Permissioned Blockchain}
 
 Bitcoin and most cryptocurrencies operate under blockchain concept, benefiting from its security, accountability, decentralization, and semi-anonymity: characteristics of public blockchains. Anyone can join and perform transactions on public blockchain networks without permission from a central authority. However, in intra-organizational use cases, conventional public blockchain suffers from a massive flaw: it requires a substantial amount of resource to confirm transactions and append them into a new block by performing challenges defined by its consensus protocol; besides, there is a need for data privacy in conducting business: public blockchains disallow such requirement.
 
-Thus, there are types of blockchain networks that can accommodate privacy called private and permissioned blockchain. ‘Private’ and ‘permissioned’ blockchain, sometimes interchangeable, differ from public blockchain in several factors, namely: membership scope, and trust. Permissioned blockchain is mainly used in industries and businesses whose internal data needs to be transparent within a limited scope of parties. Only permissioned, white-listed nodes can participate in blockchain processes \cite{a21}; hence validating transactions needs not to be complex: by using Proof-of Authority (PoA) consensus approach. Contrary to PoW, in PoA, a node does not require any computational challenge to push a block onto a chain, rather, nodes selected by the authority of the blockchain can do so by proving its identity that shows the permission \cite{a5}. In this way, transaction speed is leveraged by much without compromising security factors.
+Thus, there are types of blockchain networks that can accommodate privacy called private and permissioned blockchain. ‘Private’ and ‘permissioned’ blockchain, sometimes interchangeable, differ from public blockchain in several factors, namely: membership scope, and trust. Permissioned blockchain is mainly used in industries and businesses whose internal data needs to be transparent within a limited scope of parties. Only permissioned, white-listed nodes can participate in blockchain processes \cite{n28}; hence validating transactions needs not to be complex: by using Proof-of Authority (PoA) consensus approach. Contrary to PoW, in PoA, a node does not require any computational challenge to push a block onto a chain, rather, nodes selected by the authority of the blockchain can do so by proving its identity that shows the permission \cite{y44}. In this way, transaction speed is leveraged by much without compromising security factors.
 
 \subsection{Smart Contracts}
 
-Contracts are set of formal agreements between parties in conducting or establishing a relationship in personal, social, economic, and other fields. The agreements define roles, obligations, and rights of parties involved and determine actions to do in meeting a contract goal. Smart contracts are coded, automated contracts which are understandable by machines to run it with or without human intervention \cite{a22}.
+Contracts are set of formal agreements between parties in conducting or establishing a relationship in personal, social, economic, and other fields. The agreements define roles, obligations, and rights of parties involved and determine actions to do in meeting a contract goal. Smart contracts are coded, automated contracts which are understandable by machines to run it with or without human intervention \cite{y23}.
 
-Current applications of smart contracts lie around automated payments and asset transfer, which Nick Szabo declares them fit the nature of blockchain \cite{a23}. Not only regarding trade, but smart contracts also support credential and data logging, asset tracking, supply chain \cite{a23}, or even as a helper tool in judicial decision. Some blockchain projects such as Ethereum support smart contracts in a form of executable programs in blocks. One can tell a participant node to run a smart contract program by initiating a transaction which then invokes the program inside \cite{a24}.
+Current applications of smart contracts lie around automated payments and asset transfer, which Nick Szabo declares them fit the nature of blockchain \cite{y22}. Not only regarding trade, but smart contracts also support credential and data logging, asset tracking, supply chain \cite{y22}, or even as a helper tool in judicial decision. Some blockchain projects such as Ethereum support smart contracts in a form of executable programs in blocks. One can tell a participant node to run a smart contract program by initiating a transaction which then invokes the program inside \cite{y24}.
 
 \subsection{Decentralized Applications (dApps)}
-To expand blockchain’s capability beyond transactional and contractual matters, Cai, et al. \cite{a24} claims that decentralized applications (dApps) hosted inside blockchain are the ideal blockchain application: applications whose operations are independent from human control. Cai, et al. gives example dApp projects, one being a smart hotel IoT system where guests do not have to interact with humans in renting a room: they just pay hotel fees into a smart contract, and a room is reserved for them automatically.
+To expand blockchain’s capability beyond transactional and contractual matters, Cai, et al. \cite{y24} claims that decentralized applications (dApps) hosted inside blockchain are the ideal blockchain application: applications whose operations are independent from human control. Cai, et al. gives example dApp projects, one being a smart hotel IoT system where guests do not have to interact with humans in renting a room: they just pay hotel fees into a smart contract, and a room is reserved for them automatically.
 
-\section{Hyperledger \cite{a25}}
+\section{Hyperledger \cite{h25}}
 Hyperledger project, hosted by The Linux Foundation since 2015, is an open source blockchain project aimed to provide a blockchain framework for corporates and individuals to develop their own blockchain applications. Hyperledger follows five strict characteristics:
 \begin{enumerate}
 \item Modular: working blocks are reusable and will not affect other parts of the system when modified,
@@ -255,19 +279,19 @@ Hyperledger project, hosted by The Linux Foundation since 2015, is an open sourc
 \item User-accessible and transparent API.
 \end{enumerate}
 
-\subsection{Hyperledger Fabric \cite{a25,a26}}
+\subsection{Hyperledger Fabric \cite{h25,h26}}
 Hyperledger Fabric is one of Hyperledger frameworks which focuses on deployment of modular distributed ledger for intra- and inter-industrial dApps. It follows a permissioned blockchain model where participants (peer and orderer nodes) are strictly appointed by a central network authority to reflect the management model in industries. Despite its strict access control mechanism, Hyperledger Fabric creates multi-channel network mechanism which enables stakeholders to segregate levels of shared information; as an illustration, when a company might want to share information about discounted prices to specific partners but not others, they can broadcast it in a separate channel from its main price-announcing channel. Refer to Fig. \ref{f32}. to view an example of Hyperledger Fabric’s system arrangement.
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.96\textwidth]{figures/3-2.png}
-        \caption{Hyperledger Fabric Sample Network \cite{a26}}
+        \caption{Hyperledger Fabric Sample Network \cite{h26}}
         \label{f32}
     \end{figure}
     
 Suppose four companies or entities share information with each other in a Hyperledger Fabric network $N$, namely $R1, R2, R3, and R4$. Imagine that $R4$ is the initiator of the network, thus $R4$ gains power to establish the first version of $N$ by introducing a network configuration $NC4$. In this scenario, $R1$ is appointed to be a co-curator of the network as well: it then governs $NC4$. $R4$ decides not to involve in business transactions in $N$; while $R1$ and $R2$ would like to have an exclusive communication channel between the two; as well as between $R2$ and $R3$. Therefore, $R1$ and $R2$ create and govern channel $C1$ and its configuration $CC1$. So do $R2$ and $R3$ with $C2$ and $CC2$. Each company $R1$, $R2$, and $R3$ then deploy their peer node, consecutively: $P1, P2,$ and $P3$. Since $R1$ and $R2$ share channel $C1$ with their peers $P1$ and $P2$, the peers keep a shared ledger $L1$ and smart contract $S5$; and ditto for $R2$ and $R3$ in channel $C2$. Note that because $P2$ belongs to channels $C1$ and $C2$, $P2$ keeps both $L1$ and $L2$ and can run $S5$ and $S6$. Transactions from any peer in $C1$ and $C2$ should be approved by ordering node $O4$ issued under $NC4$ before ledger change takes place. Next, suppose that each of $R1$, $R2$, and $R3$ wishes to deploy its own application $A1$, $A2$, or $A3$, the application will connect to their corresponding channel of choice. Finally, to prove organizational and component identities in a consensus mechanism, each company can define a certification authority ($CA$).
 
-\subsection{China’s Blockchain-based Service Network (BSN) \cite{a8,a27}}
+\subsection{China’s Blockchain-based Service Network (BSN) \cite{y8,y27}}
 In 2019, The Government of People’s Republic of China initiated a national level blockchain platform rendered as Blockchain-based Service Network (BSN). It is an open Blockchain as a Service (BaaS) platform which allows blockchain developers from around the world to deploy dApps on, offering a complete set of development environment and resources. The network establishes public city nodes for developers to use for a low cost such that it would reach a wider customer target. BSN supports permissioned, permissionless, and interchain services; with Hyperledger Fabric as one of its supported permissioned blockchain platforms.
 
 \subsection{Federated Learning}
@@ -304,6 +328,7 @@ The system to examine will consist of the following system blocks (tentative), s
 \item Public applications: set of applications open for public to build upon the data provided in the public channel, which will not be implemented in this research,
 \item Private applications: applications which serve internal business process such as station application (control gates, top-up machines) and in this research a dynamic pricing application which uses AFC data from the ledger to periodically control trip fares based on congestion level using Tensorflow.js deep learning library over Node.js.
 \end{enumerate}
+\end{enumerate}
 
 All blocks are under one integrated framework implemented in Linux’s Hyperledger Fabric. 
 
@@ -318,7 +343,6 @@ Here, the dataset comes from smart card passenger transaction data of Shanghai M
 
 \begin{table*}[]
 \caption{Sample metro data}
-\tbl{}{
 \label{tdata}
 \begin{tabular}{p{0.15\linewidth}p{0.15\linewidth}p{0.11\linewidth}p{0.23\linewidth}p{0.07\linewidth}p{0.05\linewidth}p{0.09\linewidth}}
 \textbf{Card Number} & \textbf{Transac. Date} & \textbf{Transac. Time} & \textbf{Station Name} & \textbf{Mode} & \textbf{Fare\footnotemark} & \textbf{Discount}\\ \hline
@@ -327,7 +351,7 @@ Here, the dataset comes from smart card passenger transaction data of Shanghai M
 2802424753 & 2015-04-11 & 15:29:13 & 2号线上海科技馆 & 地铁 & 0 & 非优惠 \\ \hline
 \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 
 
-\end{tabular}}
+\end{tabular}
 \end{table*}
 \footnotetext{Shanghai metro fares follow the formula $price\_in\_yuan = 3 + \lceil (distance\_in\_km – 6) / 10 \rceil$. After cross-checking with Shanghai Metro fare calculator at http://service.shmetro.com/en/cphc (accessed on 2021.04.26), the prices still apply.}
 
