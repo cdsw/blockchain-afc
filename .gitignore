@@ -11,3 +11,8 @@ thesis/MC053959PL.run.xml
 thesis/MC053959PL.synctex.gz
 thesis/MC053959PL.toc
 thesis/figures/
+obsolete/
+obsolete/taxi/preprocessing-old.ipynb
+taxi/trips.csv
+taxi/taxi_zones_simpler.csv
+taxi/trips_simpler.csv
