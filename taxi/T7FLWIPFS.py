@@ -2,8 +2,10 @@ from T4MLTraining import *
 from tensorflow.python.keras.models import clone_model, load_model
 from copy import deepcopy
 from random import randint
+from U1IPFS import *
+from os import remove as rm
 
-class Client:
+class ClientI:
     def __init__(self, id_, inp_train, out_train, inp_test, out_test):
         self.id_ = id_
         self.inp_train = inp_train
@@ -11,6 +13,8 @@ class Client:
         self.inp_test = inp_test
         self.out_test = out_test
         self.deviation = 1
+        self.ipfs = IPFS(id_=self.id_)
+        self.hash = ''
 
     def getWeight(self):
         return sum(flatten(self.inp_train.tolist()[0]))
@@ -28,13 +32,17 @@ class Client:
         self.model = model
         self.model.setData(self.inp_train, self.out_train)
 
-    def train(self, draw_loss=False):
+    def train(self, iter, draw_loss=False):
         ts = time.time()
         self.model.train()
         te = time.time()
         print("Cli# {0}: {1:.2f} sec".format(self.id_, te - ts), end = '; ')
         if draw_loss == True:
             self.model.drawLoss()
+        saveloc = './models'
+        savename = '{0}-{1:03d}-{2:04d}.mde'.format(self.id_,iter,randint(0,9999))
+        self.hash = self.saveModel(saveloc, savename)
+        return self.hash
 
     def extractModel(self):
         return self.model
@@ -45,6 +53,25 @@ class Client:
         predictor.summary("",verbose_)
         self.deviation = predictor.in_percent / 100
         return self.deviation
+
+    # location: use ./models/----.mde
+    def saveModel(self, loc, nm):
+        l = "{0}/{1}".format(loc, nm)
+        self.model.model.save(l, save_format='h5')
+        hash = self.ipfs.write(loc + nm)
+        rm(l)
+        return hash
+    
+    # location: use ./models/----.mde
+    def loadModel(self, loc, nm):      
+        l = "{0}/{1}".format(loc, nm)
+        md = load_model(l)
+        self.model.replaceModel(md)
+
+    def importIPFS(self, loc, nm, hash):
+        l = "{0}/{1}.mde".format(loc, nm)
+        md = self.ipfs.take(hash,l)
+        self.loadModel(loc, nm)
 
 class Distributor:
     def __init__(self, dat, company, location, div_company=True, div_location=False, bin_='40T', frame_out=2, ratio=0.8):
@@ -65,7 +92,7 @@ class Distributor:
             tr.setup()
 
             inp_train, out_train, inp_test, out_test = tr.extract()
-            cli = Client(str(c), inp_train, out_train, inp_test, out_test)
+            cli = ClientI(str(c), inp_train, out_train, inp_test, out_test)
             self.clients.append(cli)
     
     def extractClients(self):
@@ -84,34 +111,46 @@ def combine_models(m1, m2):
 
 class Server:
     def __init__(self, clients, frame_in, frame_out, model_type, epochs_):
+        self.id_ = 'S'
         self.clients = clients
-        self.cli_models = []
         if model_type == 'CNNLSTM':
             self.model = CNNLSTM(frame_in, frame_out, epochs=epochs_)
         self.frame_in = frame_in
         self.frame_out = frame_out
+        self.ipfs = IPFS(self.id_)
+        self.cli_hashes = []
 
-    def askClients(self):
+    def askClients(self, iter):
         for c in self.clients:
-            c.train()
-            m = c.extractModel()
-            self.cli_models.append(m)      
+            hash = c.train(iter)
+            #self.ipfs.take(hash,'./models/temp')
+            #c.loadModel('./models','temp')
+            self.cli_hashes.append(hash)
 
-    def aggregate(self, mode='amt'):
+    def aggregate(self, mode='amt'): 
         multiplier = []
         cli_weights = []
         # get client demand size and weights
-        for c in self.clients:
+        for h in self.cli_hashes:
+            temp_loc = './models/temp'
+            self.ipfs.take(hash,temp_loc)
+            m = load_model(temp_loc)
+            rm(temp_loc)
+            cli_sel = None
+            for c in self.clients:
+                if c.hash == hash:
+                    cli_sel = c
+                    break
             if mode == 'amt':
-                w = c.getWeight()
+                w = cli_sel.getWeight()
             elif mode == 'pre':
-                w = c.predict(self.frame_in, self.frame_out, verbose_=0)
+                w = cli_sel.predict(self.frame_in, self.frame_out, verbose_=0)
                 try:
                     w = (1 / w)
                 except ZeroDivisionError:
                     w = 1
             multiplier.append(w)
-            cli_weights.append(c.model.model.get_weights())
+            cli_weights.append(m.get_weights())
         total_multiplier = sum(multiplier)
 
         # get proportions
@@ -133,17 +172,22 @@ class Server:
         self.model.model.build((None,self.frame_in,1))
         self.model.model.compile(optimizer='adam',loss='mse')
 
-    def sendGlobalModel(self):
+    def sendGlobalModel(self, loc, iter):
+        nm = "{0}-{1:03d}-{2:04d}.mde".format(self.id_, iter, 0)
+        # MODEL NEEDS TO BE SAVED INTO A FILE FIRST
+        self.model.model.save(loc + '/' + nm, save_format="h5")
+        hash = self.ipfs.write(loc + '/' + nm)
         for c in self.clients:
-            c.setModel(self.model)
+            c.importIPFS(loc, nm, hash)
 
-    def iterate(self, iters, mode='amt'):
+    def iterate(self, iters, loc, mode='amt'):
         for i in range(iters):
+            self.cli_hashes = []
             print("\nIteration " + str(i + 1) + " of " + str(iters), end=' | ')
             tsg = time.time()
-            self.sendGlobalModel() # loop start
+            self.sendGlobalModel(loc, i) # loop start
             tsh = time.time()
-            self.askClients()
+            self.askClients(i)
             tsi = time.time()
             self.aggregate(mode)
             tsj = time.time()

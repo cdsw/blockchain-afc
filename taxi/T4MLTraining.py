@@ -222,7 +222,7 @@ class CNNLSTM:
         return self.model.summary()
 
     def extract(self):
-        return self.model
+        return self.model      
 
     def train(self, new_dat_in=None, new_dat_out=None, verbose_=0):
         if new_dat_in == None or new_dat_out == None:
@@ -236,6 +236,10 @@ class CNNLSTM:
         loss_f, loss_ax = pl.subplots()
         loss_ax.set_yscale("log")
         loss_ax.plot(loss)
+
+    def replaceModel(self, model):
+        self.model = model
+        self.model.compile(optimizer='adam', loss='mse')
 
 class Prediction:
     def __init__(self, inp, outp, model, frame_in, frame_out):
