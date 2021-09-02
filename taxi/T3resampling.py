@@ -22,7 +22,7 @@ class Reader:
         self.subset = self.subset[['hvfhs_license_num','pickup_datetime','dropoff_datetime','PULocationID','DOLocationID']]
 
     def showSubsetStats(self):
-        self.dat.groupby(['PULocationID','hvfhs_license_num']).size()
+        print(self.dat.groupby(['PULocationID','hvfhs_license_num']).size())
     
     def save(self,loc):
         self.subset.to_csv(loc)
@@ -40,6 +40,8 @@ class Reader:
 
 def main():
     # Loading data
+    import os
+    os.chdir('/home/cl/Documents/n-bafc/blockchain-afc/taxi')
     loc = 'trips.csv'
     dat = Reader(loc)
     # Show statistics
@@ -53,4 +55,5 @@ def main():
     # Save into a simplified trip record
     loc = 'trips_simpler.csv'
     dat.save(loc)
+
 #main()

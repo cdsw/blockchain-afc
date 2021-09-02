@@ -1,7 +1,7 @@
 from T4MLTraining import *
-from tensorflow.python.keras.models import clone_model, load_model
+from tensorflow.python.keras.models import clone_model
 from copy import deepcopy
-from random import randint
+from math import log10
 
 class Client:
     def __init__(self, id_, inp_train, out_train, inp_test, out_test):
@@ -30,7 +30,10 @@ class Client:
 
     def train(self, draw_loss=False):
         ts = time.time()
-        self.model.train()
+        w = self.getWeight()
+        ep = int((log10(w))*40) + 1
+        print(':', w, ep,end= ' -- ')
+        self.model.train(epochs_=ep)
         te = time.time()
         print("Cli# {0}: {1:.2f} sec".format(self.id_, te - ts), end = '; ')
         if draw_loss == True:
@@ -68,6 +71,25 @@ class Distributor:
             cli = Client(str(c), inp_train, out_train, inp_test, out_test)
             self.clients.append(cli)
     
+    def divCustom(self, pairs):
+        for company,location in pairs:
+            tr = DataPrep(self.dat,company,location,company,location,self.bin_,self.frame_out,self.ratio)
+            tr.setup()
+
+            inp_train, out_train, inp_test, out_test = tr.extract()
+            cli = Client(str(company) + '/' + str(location), inp_train, out_train, inp_test, out_test)
+            self.clients.append(cli)
+
+    def divBoth(self):
+        for c in self.company:
+            for l in self.location:
+                tr = DataPrep(self.dat,[c],[l],[c],[l],self.bin_,self.frame_out,self.ratio)
+                tr.setup()
+
+                inp_train, out_train, inp_test, out_test = tr.extract()
+                cli = Client(str(c) + '/' + str(l), inp_train, out_train, inp_test, out_test)
+                self.clients.append(cli)
+                
     def extractClients(self):
         return self.clients
 
@@ -139,7 +161,7 @@ class Server:
 
     def iterate(self, iters, mode='amt'):
         for i in range(iters):
-            print("\nIteration " + str(i + 1) + " of " + str(iters), end=' | ')
+            print("Iteration " + str(i + 1) + " of " + str(iters), end=' | ')
             tsg = time.time()
             self.sendGlobalModel() # loop start
             tsh = time.time()

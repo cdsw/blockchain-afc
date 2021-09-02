@@ -12,7 +12,7 @@ from tensorflow.keras.layers import TimeDistributed
 from tensorflow.keras.layers import Conv1D
 from tensorflow.keras.layers import MaxPooling1D
 from tensorflow.python.keras.callbacks import History
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 from math import ceil
 import time
 
@@ -142,7 +142,7 @@ class DataPrep:
 
     def set_criteria(self):
         # Modify data
-        print(self.company,self.location, end=' | ')
+        #print(self.company,self.location, end=' | ')
         dat_limited = self.dat[self.dat['hvfhs_license_num'].isin(self.company)]
         dat_limited = dat_limited[dat_limited['PULocationID'].isin(self.location)]
         self.dat = dat_limited
@@ -224,16 +224,19 @@ class CNNLSTM:
     def extract(self):
         return self.model      
 
-    def train(self, new_dat_in=None, new_dat_out=None, verbose_=0):
-        if new_dat_in == None or new_dat_out == None:
-            self.model.fit(self.dat_in, self.dat_out, epochs=self.epochs, verbose=verbose_, shuffle=True, callbacks=[self.history])
+    def train(self, new_dat_in=None, new_dat_out=None, verbose_=0, epochs_=None):
+        if epochs_ == None:
+            ep = self.epochs
         else:
-            self.model.fit(new_dat_in, new_dat_out, epochs=self.epochs, verbose=verbose_, shuffle=True, callbacks=[self.history])
+            ep = epochs_
+        if new_dat_in == None or new_dat_out == None:
+            self.model.fit(self.dat_in, self.dat_out, epochs=ep, verbose=verbose_, shuffle=True, callbacks=[self.history])
+        else:
+            self.model.fit(new_dat_in, new_dat_out, epochs=ep, verbose=verbose_, shuffle=True, callbacks=[self.history])
 
     def drawLoss(self):
-        from numpy import log
         loss = self.history.history['loss']
-        loss_f, loss_ax = pl.subplots()
+        _, loss_ax = pl.subplots()
         loss_ax.set_yscale("log")
         loss_ax.plot(loss)
 
@@ -249,6 +252,7 @@ class Prediction:
         self.pred = []
         self.frame_in = frame_in
         self.rmse = None
+        self.mape = None
         self.frame_out = frame_out
         self.in_percent = 0
 
@@ -256,9 +260,12 @@ class Prediction:
         for to_test_idx in range(len(self.inp)):
             x_input = self.inp[to_test_idx]
             x_input = x_input.reshape((1, 1, self.frame_in, 1))
-            yhat = self.model.model.predict(x_input, verbose=0)
-            self.pred.append(yhat.tolist()[0])
-        self.rmse = (mean_squared_error(self.pred, self.outp) / self.frame_out) ** 0.5   
+            yhat = self.model.model.predict(x_input, verbose=0).tolist()[0]
+            for i in range(len(yhat)):
+                yhat[i] = max(yhat[i],0)
+            self.pred.append(yhat)
+        self.rmse = (mean_squared_error(self.pred, self.outp) / self.frame_out) ** 0.5  
+        self.mape = mean_absolute_percentage_error(self.pred,self.outp)
 
     def summary(self, label="", verbose=True):
         sum_dat = 0
@@ -271,10 +278,12 @@ class Prediction:
         self.in_percent = self.rmse/average_bin_value*10000//1/100
 
         if verbose:
-            print("RMSE " + label + " = " + str(int(self.rmse)))
-            print("Total demand " + label + " = " + str(sum_dat))
-            print("Average demand " + label + " = " + str(int(average_bin_value)))
-            print("Deviation " + label + " = " + str(self.in_percent) + "%")
+            #print("RMSE " + label + " = " + str(int(self.rmse * 100)/100), end = ' | ')
+            print("Total demand " + label + " = " + str(sum_dat), end =' || ')
+            print("Average demand " + label + " = " + str(int(average_bin_value * 100)/100), end=' || ')
+            print("RMSE " + label + " = " + str(self.in_percent) + "%", end=' || ')
+            print("MAPE " + label + " = " + str(self.mape) + "%")
+
         
     def extract(self):
         return self.pred
