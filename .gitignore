@@ -17,3 +17,8 @@ taxi/trips.csv
 taxi/taxi_zones_simpler.csv
 taxi/trips_simpler.csv
 taxi/models
+taxi/test
+taxi/Zdumx
+taxi/ZExperimentation.ipynb
+taxi/.ipynb_checkpoints
+taxi/__pycache__

@@ -217,7 +217,7 @@ class CNNLSTM:
     def setData(self, dat_in, dat_out):
         self.dat_in = dat_in
         self.dat_out = dat_out
-
+       
     def summary(self):
         return self.model.summary()
 

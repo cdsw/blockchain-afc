@@ -22,7 +22,9 @@ class Client:
         model_copy = clone_model(model.model)
         #model_copy.build((None, len(self.inp_train[0]), 1))
         model_copy.compile(optimizer='adam', loss='mse')
-        model_copy.set_weights(model.model.get_weights())
+        mw = model.model.get_weights()
+        model_copy.set_weights(mw)
+        del mw
         model = deepcopy(model)
         model.model = model_copy
         self.model = model
