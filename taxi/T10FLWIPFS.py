@@ -2,7 +2,7 @@ from T4MLTraining import *
 from tensorflow.python.keras.models import clone_model, load_model
 from copy import deepcopy
 from random import randint
-from U2IPFSNEW import *
+from U2IPFS import *
 import os
 
 def weighting(model, wei):
