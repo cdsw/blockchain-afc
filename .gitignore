@@ -1,17 +1,4 @@
 taxi/fhvhv_tripdata_2019-07.csv
-thesis
-thesis/MC053959PL-blx.bib
-thesis/MC053959PL.aux
-thesis/MC053959PL.bbl
-thesis/MC053959PL.blg
-thesis/MC053959PL.lof
-thesis/MC053959PL.log
-thesis/MC053959PL.lot
-thesis/MC053959PL.pdf
-thesis/MC053959PL.run.xml
-thesis/MC053959PL.synctex.gz
-thesis/MC053959PL.toc
-thesis/figures/
 obsolete/
 obsolete/taxi/preprocessing-old.ipynb
 taxi/trips.csv
@@ -23,5 +10,4 @@ taxi/Zdumx
 taxi/ZExperimentation.ipynb
 taxi/.ipynb_checkpoints
 taxi/ZExperim.py
-SI-DamianS.docx
 taxi/env
