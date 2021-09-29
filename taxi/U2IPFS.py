@@ -19,5 +19,3 @@ class IPFSN:
 
     def close(self):
         self.cli.close()
-
-    # https://stackoverflow.com/questions/43118022/how-do-i-unpin-and-remove-all-ipfs-content-from-my-machine

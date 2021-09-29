@@ -3,7 +3,6 @@ from tensorflow.python.keras.models import clone_model, load_model
 from copy import deepcopy
 from random import randint
 from U2IPFS import *
-import os
 
 def weighting(model, wei):
     for i in range(len(model)):

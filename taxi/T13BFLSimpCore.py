@@ -1,31 +1,23 @@
-import time
-from math import log
-import json
-from random import randint
-
 from T10FLWIPFS import weighting, combine_models, deepcopy, os, load_model
-
 from T4MLTraining import *
 from U2IPFS import *
 
+from math import log
+from random import randint
 from copy import deepcopy
+import time
 
 os.chdir("/home/cl/Documents/n-bafc/blockchain-afc/taxi")
 print(os.getcwd())
-
-# ========================================================================
 
 settings = {
     'frame_in' : 36,
     'frame_out' : 2,
     'ratio' : 0.8,
-    'bin' : '40T'
-}
-
-# ========================================================================
+    'bin' : '40T'}
 
 class Distributor:
-    def __init__(self, dat, company, location, settings_=settings):
+    def __init__(self, dat, company, location, settings_):
         self.dat = dat
         self.company = company
         self.location = location
@@ -52,9 +44,6 @@ class Distributor:
     def extractClients(self):
         return self.clients
 
-
-# =============================================================================
-
 class Transaction:
     def __init__ (self, chain, sender, recipient, load, type_, payment): #type_ - model/pay
         self.sender = sender
@@ -63,8 +52,10 @@ class Transaction:
         self.type = type_
         self.payment = payment
         self.chain = chain
-
-# ==================================================================================
+    
+    def __str__(self):
+        r = "TRX: C{0:5.5}:{1:5.5}-->{2:5.5} | {3:5.5} | ¤{4:4d} | Hashes: ".format(self.chain, self.sender, self.recipient, self.type, self.payment) + self.load
+        return r
 
 class Block:
     def __init__(self, chain, chain_idx, trxs, proof, prev_hash, ts=None, repu_list=None):
@@ -77,21 +68,28 @@ class Block:
             self.timestamp = time.time()
         else:
             self.timestamp = ts
-        if ts == None:
+        if repu_list == None:
             self.reputation_list = {}
         else:
             self.reputation_list = repu_list
 
+    def __str__(self):
+        r = "BLK: C:{0:5.5}#{1:3d} <-- PH={2:5.5}:{5:5.5}, PF={3:5.5}, RL: {4:5.5}".format(self.chain.bc_id,self.chain_idx,str(self.prev_hash),str(self.proof),str(self.reputation_list),str(self.miner))
+        return r
+
 # =================================================================================================
+def removeCli(txns, cli): #in dict
+    for k in range(len(txns)):
+        if txns[k].type == 'MOD' and txns[k].sender == cli:
+            txns.remove(txns[k])
+    return txns
 
-def removeCli(txn, cli): #in dict
-    for k in range(len(txn)):
-        if txn[k['type']] == 'model' and txn[k['sender']] == cli:
-            txn.remove(txn[k])
-    return txn
-
+def truncateViewRL(rl):
+    r = ""
+    for m in rl:
+        r += "{0:5.5}={1.4f}; ".format(m[0], m[1])
+    return r
 # ==============================================================================================================
-
 class Client:
     def __init__(self, alias, settings):
         self.alias = alias
@@ -111,6 +109,13 @@ class Client:
         self.out_train = None
         self.inp_test = None
         self.out_test = None
+
+    def __str__(self):
+        r = "{0}:{3}-{1:5.5}, {2:7d}".format(self.getType(), self.id, self.getMultiplier(), self.alias)
+        return r
+
+    def getType(self):
+        return "CLI"
 
     def getMultiplier(self):
         return sum(flatten(self.inp_train.tolist()[0]))
@@ -182,14 +187,14 @@ class Client:
         ts = time.time()
         self.model.train(epochs_=self.epoch)
         te = time.time()
-        print("Cli# {0}: {1:.2f} sec".format(self.alias, te - ts), end = '; ')
+        print("#{0}:{1:.2f}s".format(self.alias, te - ts), end = '; ')
         # save model to file
         self.model.model.save(loc, save_format='h5')
         # save to IPFS
         self.hash = self.ipfs.submit(loc)
         locM ='./models/temp{0}.fil'.format(self.id)
         f = open(locM, 'w')
-        f.write(str(self.getMultiplier))
+        f.write(str(self.getMultiplier()))
         f.close()
         self.hashM = self.ipfs.submit(locM)
         os.remove(loc)
@@ -198,55 +203,62 @@ class Client:
     def submitModelAsTransaction(self):
         # send model HASH and MULTIPLIER (number of data)
         load = self.hash + '|' + self.hashM
-        trx = Transaction(self.bc_id_raw, self.id, 0, load, 'model', 0)
-        # ||||||||||||||||||||||||||||||||| ADD TO TRX
+        trx = Transaction(self.bc_id_raw, self.id, 0, load, 'MOD', 0)
+        chidx = self.blockchain.newTransaction(trx)
+        print("{0}:{1} MOD-->CHIDX#{2:3d}".format(self.getType(),self.alias, chidx))
 
 # ============================================================================================
 class Miner(Client):
     def __init__(self, alias, settings):
         super().__init__(alias, settings)
-    
+
+    def getType(self):
+        return "MIN"
+
     def submitPayment(self, recipient, load, payment):
         load = 'Incentive to Node ' + recipient
-        trx = Transaction(self.bc_id_raw, self.id, 0, recipient, load, payment)
+        trx = Transaction(self.bc_id_raw, self.id, recipient, load, "PAY", payment)
         # |||||||||||||||||||||||||||||||||||| ADD TO TRX
     
-    def mine(self):
+    def mine(self): # RETURN BLOCK
         print("Start mining: " + self.alias)
         
         # GET TRANSACTIONS
         self.last_trxs = self.blockchain.current_transactions
-        print(self.last_trxs)
 
         t_hashes = [] #fill with (id, hash, hashM)
         for t in self.last_trxs:
-            if t['type'] == 'model':
-                t_hashes.append((t['sender'],t['load'],None))
+            if t.type == 'MOD':
+                t_hashes.append((t.sender,t.load,None))
         
+        # PoA
+        if self.blockchain.proofOfAuthority(self.id) == False:
+            return
+
         loc = "./models/"
         t_creds = []
-        # Check PoQ
+        # Obtain quality
         for t in t_hashes:
             t_mod, t_amt = t[1].split('|')
             t_id = t[0]
             # download
-            self.ipfs.fetch(t[1],loc)
-            self.ipfs.fetch(t[2],loc)
+            self.ipfs.fetch(t_mod,loc)
+            self.ipfs.fetch(t_amt,loc)
             # open files
-            fH = open(loc + t_amt, "rw")
+            fH = open(loc + t_amt, "r")
             mul = fH.read()
             fH.close()
-            md = load_model(loc+t_mod)
+            md = load_model(loc+t_mod).get_weights()
             t_creds.append((t_id, md, mul))
             os.remove(loc+t_mod)
             os.remove(loc+t_amt)
-        del t_hashes
 
         bogus_model = CNNLSTM(self.frame_in, self.frame_out)
+        bogus_model.model.compile(optimizer='adam',loss='mse')         
         
         rl_current = {}
         for t in range(len(t_creds)):
-            t_id, t_mod, t_mul = t[0], t[1], t[2]
+            t_id, t_mod, t_mul = t_creds[t][0], t_creds[t][1], int(t_creds[t][2])
             bogus_model.model.set_weights(t_mod)
             bogus_model.model.build((None,self.frame_in,1))
             bogus_model.model.compile(optimizer='adam',loss='mse')         
@@ -254,7 +266,7 @@ class Miner(Client):
             dev = self.predict(bogus_model)
             # quality calculation
             qual = dev * (1 + log(t_mul, 1000))
-            rl_current[t_id] = qual
+            rl_current[t_id] = qual[0]
 
         # send qual to IPFS and attach to proposed block
         f = open(loc+'tempQ.f','w')
@@ -263,27 +275,8 @@ class Miner(Client):
         hashQ = self.ipfs.submit(loc+'tempQ.f')
         os.remove(loc+'tempQ.f')
         
-        # get prev stuff and see diffs
-        rl_prev = json.loads(self.blockchain.lastBlock['reputation_list'])
-        print(rl_prev)
-
-        for cli, qual in rl_prev.items():
-            try:
-                if rl_prev[cli] >= rl_current[cli]:
-                    rl_current[cli] = rl_prev[cli]
-                    # remove trx here
-                    self.last_trxs = removeCli(self.last_trxs, cli)
-            except IndexError:
-                pass
-        
-        block = Block(self.blockchain.lastBlock['chain_idx'] + 1, 
-                        self.last_trxs, self.id, 
-                        self.blockchain.lastBlock['prev_hash'], 
-                        repu_list=hashQ).get()
-
-        # mine via urllib
-        print(block)
-        #||||||||||||||||||||||||||||||| CALL MINE HERE
+        # PoQ
+        self.blockchain.proofOfQuality(self.id, hashQ)
 
 
     def distributePayment(self):
@@ -303,15 +296,16 @@ class Miner(Client):
 # ==================================================================================================
 
 class Blockchain(object): # PROVING NODE: ID + SALT + HASH
-    def __init__(self, url):
+    def __init__(self):
         self.chain = []
         self.current_transactions = []
         self.newBlock(previous_hash=1, proof=1) # CHANGE PREV HASH AND PROOF ???
         self.salt = str(randint(1,100000)) # salt for this blockchain
         self.clients = set()
-        self.url = url
         self.bc_id = str(hex(id(self)))
-        print("Blockchain created with ID: " + self.bc_id)
+        print("Blockchain created with ID: " + self.bc_id + " " + str(int(self.bc_id,base=16)))
+        self.block_backlog = []
+        self.ipfs = IPFSN(self.bc_id)
 
     def authorizeClient(self, clientId):
         # hash is secret to the
@@ -319,34 +313,50 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
         self.clients.add(cid_hash)
 
     def proofOfAuthority(self, clientId):
-        if hash(clientId + self.salt) in self.clients:
-            return clientId
-        return 0
+        if hash(clientId + self.salt) not in self.clients:
+            print("{0:5.5} MINE REJECTED: UNAUTH".format(clientId))
+            return False
+        print("{0:5.5} MINE APPROVED: POA".format(clientId))
+        return True
 
-    def proofOfQuality(self, hashQ):
-        # get last block's quality hash        
-        ipfs = IPFSN("0")
-        loc = "./models/temp"
-        hashQP = self.lastBlock['reputation_list']
-        ipfs.fetch(hashQP, loc)
-        ipfs.fetch(hashQ, loc)
-        f = open(loc+hashQP, "r")
-        repP = f.read()
+    def proofOfQuality(self, clientId, hashQ):
+        # get prev stuff and see diffs
+        rl_prev = self.lastBlock.reputation_list
+        # load hashQ
+        loc = './models/'
+        self.ipfs.fetch(hashQ, loc)
+        f = open(loc + hashQ)
+        rl_current = f.read()
         f.close()
-        f = open(loc+hashQ, "r")
-        repQ = f.read()
-        f.close()
-        # ADD CONDITIONS HERE.
-        print(repP, repQ)
-        return 0
+        os.remove(loc + hashQ)
 
-    # EDIT+=========================================================
+        for cli, qual in rl_prev.items():
+            try:
+                if rl_prev[cli] >= rl_current[cli]:
+                    rl_current[cli] = rl_prev[cli]
+                    # remove trx here
+                    self.last_trxs = removeCli(self.last_trxs, cli)
+            except IndexError:
+                pass
+        
+        if len(rl_current) == 0:
+            return False
+
+        print("PREV="+truncateViewRL(rl_prev)+ " CURR="+truncateViewRL(rl_current))
+        block = Block(self,self.lastBlock.chain_idx + 1, 
+                        self.last_trxs, clientId, 
+                        self.lastBlock.prev_hash, 
+                        repu_list=hashQ)
+
+        print(block)
+        return True
+
     def newBlock(self, proof, previous_hash=None): # int str |> dict
         if previous_hash == None:
             previous_hash = str(hash(self.chain[-1]))
 
         index = len(self.chain) + 1
-        block = Block(id(self), index, self.current_transactions, proof, previous_hash).get()
+        block = Block(id(self), index, self.current_transactions, proof, previous_hash)
 
         # Reset the current list of transactions
         self.current_transactions = []
@@ -354,15 +364,13 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
         self.chain.append(block)
         return block
 
-    def newTransaction(self, sender, recipient, load, type_, amount): # str str str int |> int
-        trx = Transaction(id(self), sender, recipient, load, type_, amount)
+    def newTransaction(self, trx):
         self.current_transactions.append(trx)
-        return self.lastBlock['chain_idx'] + 1
+        return self.lastBlock.chain_idx + 1
 
     @property
     def lastBlock(self):
         return self.chain[-1]
-
 
     def validChain(self, chain):
         """
@@ -421,4 +429,3 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
             return True
 
         return False
-

@@ -1,4 +1,6 @@
 from T3resampling import *
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 import pandas as pd
 from numpy import array
 import matplotlib.pyplot as pl
