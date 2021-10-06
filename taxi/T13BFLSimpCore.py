@@ -1,4 +1,4 @@
-from T10FLWIPFS import weighting, combine_models, deepcopy, os, load_model
+from T10FLWIPFS import weighting, combine_models, os, load_model
 from T4MLTraining import *
 from U2IPFS import *
 
@@ -74,7 +74,7 @@ class Block:
             self.reputation_list = repu_list
 
     def __str__(self):
-        r = "BLK: C:{0:5.5}#{1:3d} <-- PH={2:5.5}:{5:5.5}, PF={3:5.5}, RL: {4:5.5}".format(self.chain.bc_id,self.chain_idx,str(self.prev_hash),str(self.proof),str(self.reputation_list),str(self.miner))
+        r = "BLK: C:{0:7.7}#{1:3d} <-- PH={2:5.5}:PF={3:5.5}, RL={4:5.5}, #TRXS={5}".format(str(self.chain.bc_id),self.chain_idx,str(self.prev_hash),str(self.proof),str(self.reputation_list), str(len(self.transactions)))
         return r
 
 # =================================================================================================
@@ -86,8 +86,8 @@ def removeCli(txns, cli): #in dict
 
 def truncateViewRL(rl):
     r = ""
-    for m in rl:
-        r += "{0:5.5}={1.4f}; ".format(m[0], m[1])
+    for c, q in rl.items():
+        r += "{0:5.5}:{1:.4}; ".format(c,q)
     return r
 # ==============================================================================================================
 class Client:
@@ -96,12 +96,13 @@ class Client:
         self.id = str(hash(alias + str(randint(3,418000))))
         self.ipfs = IPFSN(alias)
         self.blockchain = None
+        self.balance = 0
 
         #settings
         self.frame_in = settings['frame_in']
         self.frame_out = settings['frame_out']
         self.ratio = settings['ratio']
-        self.bin = settings['bin']
+        self.bin = settings['bin'] 
         self.epoch = 1 #-------------------------------------------------- 110/3
 
         #pre-assignment placeholder
@@ -215,7 +216,7 @@ class Miner(Client):
     def getType(self):
         return "MIN"
 
-    def submitPayment(self, recipient, load, payment):
+    def incentivize(self, ): ######## LAYER 2 INCENTIVE #OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
         load = 'Incentive to Node ' + recipient
         trx = Transaction(self.bc_id_raw, self.id, recipient, load, "PAY", payment)
         # |||||||||||||||||||||||||||||||||||| ADD TO TRX
@@ -224,7 +225,7 @@ class Miner(Client):
         print("Start mining: " + self.alias)
         
         # GET TRANSACTIONS
-        self.last_trxs = self.blockchain.current_transactions
+        self.last_trxs = deepcopy(self.blockchain.current_transactions)
 
         t_hashes = [] #fill with (id, hash, hashM)
         for t in self.last_trxs:
@@ -265,19 +266,22 @@ class Miner(Client):
             # prediction phase
             dev = self.predict(bogus_model)
             # quality calculation
-            qual = dev * (1 + log(t_mul, 1000))
+            qual = dev * (1 + log(t_mul, 1000)) * (1 + log(self.getMultiplier()), 1000)
             rl_current[t_id] = qual[0]
 
+        resp = ""
+        for ci, qu in rl_current.items():
+            resp += "{0}|{1};".format(ci,qu)
+
         # send qual to IPFS and attach to proposed block
-        f = open(loc+'tempQ.f','w')
-        f.write(str(rl_current))
-        f.close
-        hashQ = self.ipfs.submit(loc+'tempQ.f')
-        os.remove(loc+'tempQ.f')
-        
+        f = open(loc+'tempQ','w')
+        f.write(resp)
+        f.close()
+        hashQ = self.ipfs.submit(loc+'tempQ')
+        os.remove(loc+'tempQ')
         # PoQ
         self.blockchain.proofOfQuality(self.id, hashQ)
-
+        return
 
     def distributePayment(self):
         # distribute payments into clients for each trx (???)
@@ -299,18 +303,21 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
     def __init__(self):
         self.chain = []
         self.current_transactions = []
-        self.newBlock(previous_hash=1, proof=1) # CHANGE PREV HASH AND PROOF ???
-        self.salt = str(randint(1,100000)) # salt for this blockchain
-        self.clients = set()
         self.bc_id = str(hex(id(self)))
-        print("Blockchain created with ID: " + self.bc_id + " " + str(int(self.bc_id,base=16)))
         self.block_backlog = []
+        self.clients = set()
+        self.cli_pointers = []
+        self.newBlock(previous_hash=0, proofA=0, proofQ=0, trxs=[]) # CHANGE PREV HASH AND PROOF ???
+        self.salt = str(randint(1,100000)) # salt for this blockchain
+        print("Blockchain created with ID: " + self.bc_id + " " + str(int(self.bc_id,base=16)))
         self.ipfs = IPFSN(self.bc_id)
+        self.latest_repu_inc = {}
 
-    def authorizeClient(self, clientId):
+    def authorizeClient(self, client):
         # hash is secret to the
-        cid_hash = hash(clientId + self.salt)
+        cid_hash = hash(client.id + self.salt)
         self.clients.add(cid_hash)
+        self.cli_pointers.append(client)
 
     def proofOfAuthority(self, clientId):
         if hash(clientId + self.salt) not in self.clients:
@@ -322,46 +329,87 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
     def proofOfQuality(self, clientId, hashQ):
         # get prev stuff and see diffs
         rl_prev = self.lastBlock.reputation_list
-        # load hashQ
+
         loc = './models/'
+
+        # load hashQ
         self.ipfs.fetch(hashQ, loc)
-        f = open(loc + hashQ)
+        f = open(loc + hashQ, 'r')
         rl_current = f.read()
         f.close()
         os.remove(loc + hashQ)
 
-        for cli, qual in rl_prev.items():
-            try:
-                if rl_prev[cli] >= rl_current[cli]:
-                    rl_current[cli] = rl_prev[cli]
-                    # remove trx here
-                    self.last_trxs = removeCli(self.last_trxs, cli)
-            except IndexError:
-                pass
-        
-        if len(rl_current) == 0:
+        if type(rl_prev) == str:
+            self.ipfs.fetch(rl_prev, loc)
+            f = open(loc + rl_prev, 'r')
+            rl_pre = f.read()
+            f.close()
+            os.remove(loc + rl_prev)
+     
+            rl_prev = {}
+            rl_clis = rl_pre.split(';')[:-1]
+            for l in rl_clis:
+                k = l.split('|')
+                rl_prev[k[0]] = float(k[1])
+
+        dc_rl = {}
+        rl_clis = rl_current.split(';')[:-1]
+        for l in rl_clis:
+            k = l.split('|')
+            dc_rl[k[0]] = float(k[1])
+
+        trxs = deepcopy(self.current_transactions)
+        # Update values
+
+        updated = {}
+        for cli, qual in dc_rl.items():
+            if cli not in rl_prev.keys():
+                updated[cli] = qual
+            elif updated[cli] < qual:
+                updated[cli] = qual
+            else:
+                trxs = removeCli(trxs, cli)
+
+        print("PREV="+truncateViewRL(rl_prev)+ " CURR="+truncateViewRL(updated))
+
+        if len(trxs) == 0:
+            print("{0:5.5} MINE REJECTED: SUBSTANDARD".format(clientId))
             return False
 
-        print("PREV="+truncateViewRL(rl_prev)+ " CURR="+truncateViewRL(rl_current))
-        block = Block(self,self.lastBlock.chain_idx + 1, 
-                        self.last_trxs, clientId, 
-                        self.lastBlock.prev_hash, 
-                        repu_list=hashQ)
-
-        print(block)
+        print("{0:5.5} MINE APPROVED AND ACCEPTED: POQ".format(clientId))
+        #print(block)
+        self.newBlock(clientId, hashQ, trxs)
         return True
 
-    def newBlock(self, proof, previous_hash=None): # int str |> dict
+    def newBlock(self, proofA, proofQ, trxs, previous_hash=None, mode="MINE", incentive_list=None): # int str |> dict
         if previous_hash == None:
             previous_hash = str(hash(self.chain[-1]))
+        try:
+            block = Block(self,self.lastBlock.chain_idx + 1,
+                            trxs, proofA, 
+                            self.lastBlock.prev_hash, 
+                            repu_list=proofQ)
+        except Exception as e:
+            print(e, end='|')
+            print("Brand new blockchain, creating genesis block")
+            block = Block(self,0,[], proofA, proofQ, repu_list={})
+            self.chain.append(block)
 
-        index = len(self.chain) + 1
-        block = Block(id(self), index, self.current_transactions, proof, previous_hash)
-
-        # Reset the current list of transactions
-        self.current_transactions = []
-
-        self.chain.append(block)
+        if mode == "MINE":
+            print(block)
+            # ADD TO BACKLOG
+            self.block_backlog.append(block)
+        elif mode == "CONSENSUS":
+            self.incentivize(incentive_list)
+            for tx in trxs:
+                if tx.type == "PAY":
+                    for ci in self.cli_pointers:
+                        if tx.sender == ci.id:
+                            ci.balance -= tx.payment
+                        if tx.recipient == ci.id:
+                            ci.balance += tx.payment
+                    print("TRX: {0:5.5} > [{1:4.2d}] > {1:5.5}".format(tx.sender, tx.payment, tx.recipient))
+            self.chain.append(block)
         return block
 
     def newTransaction(self, trx):
@@ -371,61 +419,96 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
     @property
     def lastBlock(self):
         return self.chain[-1]
+        
+    def consensus(self):
+        loc = "./models/"
+        cl_rl = {}
+        for blk in self.block_backlog:
+            cl, rl = blk.proof, blk.reputation_list
+            try:
+                self.ipfs.fetch(rl,loc)
+                f = open(loc + rl, 'r')
+                rle = f.read()
+                f.close()
+                os.remove(loc+rl)
 
-    def validChain(self, chain):
-        """
-        Determine if a given blockchain is valid
-        :param chain: <list> A blockchain
-        :return: <bool> True if valid, False if not
-        """
+                rl = {}
+                rl_clis = rle.split(';')[:-1]
+                for l in rl_clis:
+                    k = l.split('|')
+                    rl[k[0]] = float(k[1])
 
-        last_block = chain[0]
-        current_index = 1
+                cl_rl[cl] = rl
+            except Exception as e:
+                pass
+                #print(e)
+        
+        res = {}
+        
+        # Get max
+        for k, r in cl_rl.items():
+            if len(res) == 0:
+                for k, v in r.items():
+                    res[k] = v
+            else:
+                for k, v in r.items():
+                    if r[k] > res[k]:
+                        res[k] = r[k]
 
-        while current_index < len(chain):
-            block = chain[current_index]
-            print(f'{last_block}')
-            print(f'{block}')
-            print("\n-----------\n")
-            # Check that the hash of the block is correct
-            if block['previous_hash'] != self.hash(last_block):
-                return False
+        rl_prev = self.lastBlock.reputation_list
+        if type(rl_prev) == str:
+            self.ipfs.fetch(rl_prev, loc)
+            f = open(loc + rl_prev, 'r')
+            rl_pre = f.read()
+            f.close()
+            os.remove(loc + rl_prev)
 
-            last_block = block
-            current_index += 1
+            rl_prev = {}
+            rl_clis = rl_pre.split(';')[:-1]
+            for l in rl_clis:
+                k = l.split('|')
+                rl_prev[k[0]] = float(k[1])
 
-        return True
+        c_inc = {}
+        rl_deviation = {}
+        
+        print(rl_prev)
+        # Give credit
+        for cli, rli in cl_rl.items():
+            c_inc[cli] = 0
+            for k, v in rli.items():
+                if rli[k] == res[k]:
+                    try:
+                        rl_deviation[rli[k]]
+                        c_inc[cli] += rli[k] - rl_prev[k]
+                    except KeyError:
+                        if c_inc[cli] != 0:
+                            c_inc[cli] += rli[k]
+                        else:
+                            c_inc[cli] = rli[k]
+                
+        proofA = ""
+        for cli in c_inc.keys():
+            if c_inc[cli] > 0:
+                proofA += str(cli) + "|"
+        
+        loc_ = "./models/tempD"
+        f = open(loc_, "w")
+        f.write(str(cl_rl))
+        f.close()
+        proofQ = self.ipfs.submit(loc_)
+        os.remove(loc_)
 
-    def resolveConflicts(self):
-        """
-        This is our Consensus Algorithm, it resolves conflicts
-        by replacing our chain with the longest one in the network.
-        :return: <bool> True if our chain was replaced, False if not
-        """
+        block = self.newBlock(proofA, proofQ, self.current_transactions, mode="CONSENSUS", incentive_list=c_inc)
+        print(block, " -- CONSENSUS")
+        return c_inc
 
-        neighbours = self.nodes
-        new_chain = None
-
-        # We're only looking for chains longer than ours
-        max_length = len(self.chain)
-
-        # Grab and verify the chains from all the nodes in our network
-        for node in neighbours:
-            #response = requests.get(f'http://{node}/chain')
-            response = None # |||||||||||||||||||||||||||||||||||||||
-
-            if response.status_code == 200:
-                length = response.json()['length']
-                chain = response.json()['chain']
-
-                # Check if the length is longer and the chain is valid
-                if length > max_length and self.validChain(chain):
-                    max_length = length
-                    new_chain = chain
-
-        # Replace our chain if we discovered a new, valid chain longer than ours
-        if new_chain:
-            self.chain = new_chain
-            return True
-
-        return False
+    def incentivize(self, inc):
+        # SEPARATE TRX AND MODEL TRX
+        for c, i in inc.items():
+            for cl in self.cli_pointers:
+                if cl.id == c and i != 0:
+                    tx = Transaction(self.bc_id,0,cl.id,'incentivization',"PAY",i)
+                    self.newTransaction(tx)
+                    cl.incentivize() #OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+            inc[c] = 0
