@@ -11,3 +11,4 @@ taxi/ZExperimentation.ipynb
 taxi/.ipynb_checkpoints
 taxi/ZExperim.py
 taxi/env
+taxi/__pycache__/*.pyc

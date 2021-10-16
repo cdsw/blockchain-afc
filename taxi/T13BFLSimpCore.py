@@ -5,7 +5,7 @@ from U2IPFS import *
 from math import log
 from random import randint
 from copy import deepcopy
-import time
+import time, json
 
 os.chdir("/home/cl/Documents/n-bafc/blockchain-afc/taxi")
 print(os.getcwd())
@@ -54,7 +54,7 @@ class Transaction:
         self.chain = chain
     
     def __str__(self):
-        r = "TRX: C{0:5.5}:{1:5.5}-->{2:5.5} | {3:5.5} | ¤{4:4d} | Hashes: ".format(self.chain, self.sender, self.recipient, self.type, self.payment) + self.load
+        r = "TRX: C{0:5.5}:{1:5.5}-->{2:5.5} | {3:5.5} | ¤{4:4.2f} | Load: ".format(str(self.chain), str(self.sender), str(self.recipient), self.type, self.payment) + self.load
         return r
 
 class Block:
@@ -79,10 +79,16 @@ class Block:
 
 # =================================================================================================
 def removeCli(txns, cli): #in dict
-    for k in range(len(txns)):
-        if txns[k].type == 'MOD' and txns[k].sender == cli:
-            txns.remove(txns[k])
-    return txns
+    tx_new = []
+    for t in txns:
+        if t.type == 'PAY':
+            tx_new.append(t)
+        if t.type == 'MOD':
+            if t.sender == cli:
+                pass
+            else:
+                tx_new.append(t)
+    return tx_new
 
 def truncateViewRL(rl):
     r = ""
@@ -143,18 +149,18 @@ class Client:
         for t in trxs:
             weightHash, multiplierHash = t.split('|')[0], t.split('|')[1]
             #import weights and multiplies from IPFS
-            self.ipfs.fetch(weightHash,loc + weightHash)
-            self.ipfs.fetch(multiplierHash,loc + multiplierHash)
+            self.ipfs.fetch(weightHash,loc)
+            self.ipfs.fetch(multiplierHash,loc)
             # read model
-            md = load_model(self.loc+weightHash).get_weights()
+            md = load_model(loc+weightHash).get_weights()
             weights.append(md)
             # read multiplier
             f = open(loc + multiplierHash, "r")
             mult = int(f.read())
             total_multiplier += mult
             multiplier.append(mult)
-            os.remove(self.loc+weightHash)
-            os.remove(self.loc+multiplierHash)
+            os.remove(loc+weightHash)
+            os.remove(loc+multiplierHash)
 
         # get proportions
         for w in multiplier:
@@ -182,11 +188,14 @@ class Client:
         self.out_test = out_test
         self.multiplier = self.getMultiplier()
 
-    def train(self):
+    def train(self, epoch=None):
         # DONE AFTER AGGREGATION
         loc='./models/temp{0}.h5'.format(self.id)
         ts = time.time()
-        self.model.train(epochs_=self.epoch)
+        if epoch == None:
+            self.model.train(epochs_=self.epoch)
+        else:
+            self.model.train(epochs_=epoch)
         te = time.time()
         print("#{0}:{1:.2f}s".format(self.alias, te - ts), end = '; ')
         # save model to file
@@ -200,6 +209,15 @@ class Client:
         self.hashM = self.ipfs.submit(locM)
         os.remove(loc)
         os.remove(locM)
+
+    def predict(self, model, weights, verbose_=False):
+        self.model = model
+        self.replaceWeights(weights)
+        predictor = Prediction(self.inp_test,self.out_test,self.model,self.frame_in, self.frame_out)
+        predictor.predict()
+        predictor.summary("",verbose_)
+        self.deviation = predictor.in_percent / 100
+        return self.deviation
 
     def submitModelAsTransaction(self):
         # send model HASH and MULTIPLIER (number of data)
@@ -215,11 +233,6 @@ class Miner(Client):
 
     def getType(self):
         return "MIN"
-
-    def incentivize(self, ): ######## LAYER 2 INCENTIVE #OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-        load = 'Incentive to Node ' + recipient
-        trx = Transaction(self.bc_id_raw, self.id, recipient, load, "PAY", payment)
-        # |||||||||||||||||||||||||||||||||||| ADD TO TRX
     
     def mine(self): # RETURN BLOCK
         print("Start mining: " + self.alias)
@@ -266,6 +279,7 @@ class Miner(Client):
             # prediction phase
             dev = self.predict(bogus_model)
             # quality calculation
+            ##OOOOOOOOOOOOOOOOOOOOOOOOOOO A D D : Q U A L   F R O M   E A C H   N O D E
             qual = dev * (1 + log(t_mul, 1000)) * (1 + log(self.getMultiplier()), 1000)
             rl_current[t_id] = qual[0]
 
@@ -283,12 +297,6 @@ class Miner(Client):
         self.blockchain.proofOfQuality(self.id, hashQ)
         return
 
-    def distributePayment(self):
-        # distribute payments into clients for each trx (???)
-
-
-        # last: clear last trxs
-        self.last_trxs = []
 
     def predict(self, model, verbose_=False):
         predictor = Prediction(self.inp_test,self.out_test,model,self.frame_in, self.frame_out)
@@ -346,11 +354,7 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
             f.close()
             os.remove(loc + rl_prev)
      
-            rl_prev = {}
-            rl_clis = rl_pre.split(';')[:-1]
-            for l in rl_clis:
-                k = l.split('|')
-                rl_prev[k[0]] = float(k[1])
+            rl_prev = json.loads(rl_pre.replace("\'","\""))
 
         dc_rl = {}
         rl_clis = rl_current.split(';')[:-1]
@@ -358,20 +362,24 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
             k = l.split('|')
             dc_rl[k[0]] = float(k[1])
 
+        print("Proposal: ", truncateViewRL(dc_rl))
         trxs = deepcopy(self.current_transactions)
-        # Update values
 
         updated = {}
+
         for cli, qual in dc_rl.items():
             if cli not in rl_prev.keys():
                 updated[cli] = qual
-            elif updated[cli] < qual:
+            elif rl_prev[cli] < qual:
                 updated[cli] = qual
             else:
                 trxs = removeCli(trxs, cli)
-
-        print("PREV="+truncateViewRL(rl_prev)+ " CURR="+truncateViewRL(updated))
-
+        
+        try:
+            print("PREV = "+truncateViewRL(rl_prev)+ " | CURR = "+truncateViewRL(updated))
+        except KeyError:
+            print("PREV=\{\} | CURR="+truncateViewRL(updated))
+            
         if len(trxs) == 0:
             print("{0:5.5} MINE REJECTED: SUBSTANDARD".format(clientId))
             return False
@@ -401,6 +409,9 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
             self.block_backlog.append(block)
         elif mode == "CONSENSUS":
             self.incentivize(incentive_list)
+            for i in self.current_transactions:
+                if i.type == "PAY":
+                    trxs.append(i)
             for tx in trxs:
                 if tx.type == "PAY":
                     for ci in self.cli_pointers:
@@ -408,8 +419,9 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
                             ci.balance -= tx.payment
                         if tx.recipient == ci.id:
                             ci.balance += tx.payment
-                    print("TRX: {0:5.5} > [{1:4.2d}] > {1:5.5}".format(tx.sender, tx.payment, tx.recipient))
-            self.chain.append(block)
+                    print(tx)
+            if len(trxs) > 0:
+                self.chain.append(block)
         return block
 
     def newTransaction(self, trx):
@@ -444,7 +456,7 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
                 #print(e)
         
         res = {}
-        
+
         # Get max
         for k, r in cl_rl.items():
             if len(res) == 0:
@@ -456,59 +468,91 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
                         res[k] = r[k]
 
         rl_prev = self.lastBlock.reputation_list
+
         if type(rl_prev) == str:
             self.ipfs.fetch(rl_prev, loc)
             f = open(loc + rl_prev, 'r')
             rl_pre = f.read()
             f.close()
             os.remove(loc + rl_prev)
-
-            rl_prev = {}
-            rl_clis = rl_pre.split(';')[:-1]
-            for l in rl_clis:
-                k = l.split('|')
-                rl_prev[k[0]] = float(k[1])
+            rl_prev = json.loads(rl_pre.replace("\'","\""))
 
         c_inc = {}
-        rl_deviation = {}
-        
-        print(rl_prev)
+        inc_l2 = {}
+
         # Give credit
         for cli, rli in cl_rl.items():
             c_inc[cli] = 0
+            inc_l2[cli] = {}
             for k, v in rli.items():
                 if rli[k] == res[k]:
                     try:
-                        rl_deviation[rli[k]]
-                        c_inc[cli] += rli[k] - rl_prev[k]
+                        diff = rli[k] - rl_prev[k]
+                        if diff > 0:
+                            c_inc[cli] += diff
                     except KeyError:
                         if c_inc[cli] != 0:
                             c_inc[cli] += rli[k]
                         else:
                             c_inc[cli] = rli[k]
-                
+                    try:
+                        diff = rli[k] - rl_prev[k]
+                        if diff > 0:                        
+                            inc_l2[cli][k] = rli[k] - rl_prev[k]
+                    except:
+                        inc_l2[cli][k] = rli[k]
+
         proofA = ""
         for cli in c_inc.keys():
             if c_inc[cli] > 0:
                 proofA += str(cli) + "|"
         
+        rl_latest = {}
+        for k, cr in cl_rl.items():
+            for c, r in cr.items():
+                rl_latest[c] = r
+
         loc_ = "./models/tempD"
         f = open(loc_, "w")
-        f.write(str(cl_rl))
+        f.write(str(rl_latest))
         f.close()
         proofQ = self.ipfs.submit(loc_)
         os.remove(loc_)
 
-        block = self.newBlock(proofA, proofQ, self.current_transactions, mode="CONSENSUS", incentive_list=c_inc)
+        txs_filter = []
+        for cli, rl in inc_l2.items():
+            for r in rl.keys():
+                txs_filter.append(r)
+        
+        txs_selected = []
+
+        for t in self.current_transactions:
+            if t.type == 'PAY':
+                txs_selected.append(t)
+            if t.sender in txs_filter:
+                txs_selected.append(t)
+                
+        block = self.newBlock(proofA, proofQ, txs_selected, mode="CONSENSUS", incentive_list=[c_inc,inc_l2])
         print(block, " -- CONSENSUS")
+        self.current_transactions = []
+
         return c_inc
 
     def incentivize(self, inc):
         # SEPARATE TRX AND MODEL TRX
-        for c, i in inc.items():
+        l1_inc = inc[0]
+        l2_inc = inc[1]
+        for c, i in l1_inc.items():
             for cl in self.cli_pointers:
                 if cl.id == c and i != 0:
-                    tx = Transaction(self.bc_id,0,cl.id,'incentivization',"PAY",i)
+                    tx = Transaction(self.bc_id,0,cl.id,'L1 Incentivization',"PAY",i)
                     self.newTransaction(tx)
-                    cl.incentivize() #OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-            inc[c] = 0
+
+        # MOVE TO MINER SIDE???
+        for min, cli in l2_inc.items():
+            for c, amt in cli.items():
+                multiplier = 0.30
+                if min == c:
+                    continue
+                tx = Transaction(self.bc_id,min,c,'L2 Incentivization', "PAY", amt * multiplier)
+                self.newTransaction(tx)
