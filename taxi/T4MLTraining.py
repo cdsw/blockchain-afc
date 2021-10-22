@@ -1,6 +1,6 @@
 from T3resampling import *
 import os
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+#os.environ["TF_CPP_MIN_LOG_LEVEL"] = "0"
 import pandas as pd
 from numpy import array
 import matplotlib.pyplot as pl
@@ -14,7 +14,7 @@ from tensorflow.keras.layers import TimeDistributed
 from tensorflow.keras.layers import Conv1D
 from tensorflow.keras.layers import MaxPooling1D
 from tensorflow.python.keras.callbacks import History
-from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
+from sklearn.metrics import mean_squared_error
 from math import ceil
 import time
 
@@ -188,16 +188,17 @@ class DataPrep:
         self.out_test = array(out_t[int(len(out_t)*self.ratio):])
         del self.bin_out, self.bin_out_test
         
-    def summary(self):
+    def summary(self, name):
         sum_dtl = sum(self.inp_train) + sum(self.inp_test)
         sum_tet = sum(self.inp_test)
+        print('Alias: ' + str(name), end=' | ')
         print("Sum of all datalist: " + str(sum_dtl[0][0][0]), end=' | ')
         print("Sum of all tested: " + str(sum_tet[0][0][0]))
 
-    def setup(self):
+    def setup(self, name=''):
         self.set_criteria()
         self.buildTrainingData()
-        self.summary()
+        self.summary(name)
 
     def extract(self):
         return self.inp_train, self.out_train, self.inp_test, self.out_test
@@ -254,7 +255,6 @@ class Prediction:
         self.pred = []
         self.frame_in = frame_in
         self.rmse = None
-        self.mape = None
         self.frame_out = frame_out
         self.in_percent = 0
 
@@ -267,7 +267,6 @@ class Prediction:
                 yhat[i] = max(yhat[i],0)
             self.pred.append(yhat)
         self.rmse = (mean_squared_error(self.pred, self.outp) / self.frame_out) ** 0.5  
-        self.mape = mean_absolute_percentage_error(self.pred,self.outp)
 
     def summary(self, label="", verbose=True):
         sum_dat = 0
@@ -284,7 +283,6 @@ class Prediction:
             print("Total demand " + label + " = " + str(sum_dat), end =' || ')
             print("Average demand " + label + " = " + str(int(average_bin_value * 100)/100), end=' || ')
             print("RMSE " + label + " = " + str(self.in_percent) + "%", end=' || ')
-            print("MAPE " + label + " = " + str(self.mape) + "%")
 
         
     def extract(self):

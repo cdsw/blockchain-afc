@@ -7,8 +7,10 @@ from random import randint
 from copy import deepcopy
 import time, json
 
-os.chdir("/home/cl/Documents/n-bafc/blockchain-afc/taxi")
-print(os.getcwd())
+#print(os.getcwd())
+
+#os.chdir("/home/cl/Documents/n-bafc/blockchain-afc/taxi")
+#print(os.getcwd())
 
 settings = {
     'frame_in' : 36,
@@ -31,10 +33,11 @@ class Distributor:
         for c in self.company:
             for l in self.location:
                 tr = DataPrep(self.dat,[c],[l],[c],[l],self.bin_,self.frame_out,self.ratio)
-                tr.setup()
+                alias = str(c) + '/' + str(l)
+                tr.setup(name=alias)
 
                 inp_train, out_train, inp_test, out_test = tr.extract()
-                if (c, l) == (3,4) or (c,l) == (5,4):
+                if (c,l) in [(3,4),(3,0),(5,4)]:
                     cli = Miner(str(c) + '/' + str(l), settings)
                 else:
                     cli = Client(str(c) + '/' + str(l), settings)
@@ -141,6 +144,7 @@ class Client:
         self.replaceWeights(aggr)
                         
     def aggregate(self, trxs):
+        print("A:{0}".format(self.alias), end = ' ')
         weights = []
         multiplier = []
         total_multiplier = 0
@@ -153,12 +157,15 @@ class Client:
             self.ipfs.fetch(multiplierHash,loc)
             # read model
             md = load_model(loc+weightHash).get_weights()
-            weights.append(md)
+            ###################################################
             # read multiplier
             f = open(loc + multiplierHash, "r")
             mult = int(f.read())
             total_multiplier += mult
+            ###################################################
+            weights.append(md)
             multiplier.append(mult)
+            f.close()
             os.remove(loc+weightHash)
             os.remove(loc+multiplierHash)
 
@@ -277,11 +284,11 @@ class Miner(Client):
             bogus_model.model.build((None,self.frame_in,1))
             bogus_model.model.compile(optimizer='adam',loss='mse')         
             # prediction phase
-            dev = self.predict(bogus_model)
+            dev = self.predict(bogus_model, t_mod)
             # quality calculation
             ##OOOOOOOOOOOOOOOOOOOOOOOOOOO A D D : Q U A L   F R O M   E A C H   N O D E
-            qual = dev * (1 + log(t_mul, 1000)) * (1 + log(self.getMultiplier()), 1000)
-            rl_current[t_id] = qual[0]
+            qual = (1/dev)[0] * (1 + log(t_mul, 1000)) * (1 + log(self.getMultiplier(), 1000))
+            rl_current[t_id] = qual
 
         resp = ""
         for ci, qu in rl_current.items():
@@ -296,14 +303,6 @@ class Miner(Client):
         # PoQ
         self.blockchain.proofOfQuality(self.id, hashQ)
         return
-
-
-    def predict(self, model, verbose_=False):
-        predictor = Prediction(self.inp_test,self.out_test,model,self.frame_in, self.frame_out)
-        predictor.predict()
-        predictor.summary("",verbose_)
-        self.deviation = predictor.in_percent / 100
-        return self.deviation
 
 # ==================================================================================================
 
@@ -391,11 +390,11 @@ class Blockchain(object): # PROVING NODE: ID + SALT + HASH
 
     def newBlock(self, proofA, proofQ, trxs, previous_hash=None, mode="MINE", incentive_list=None): # int str |> dict
         if previous_hash == None:
-            previous_hash = str(hash(self.chain[-1]))
+            previous_hash = str(hash(self.lastBlock))
         try:
             block = Block(self,self.lastBlock.chain_idx + 1,
                             trxs, proofA, 
-                            self.lastBlock.prev_hash, 
+                            previous_hash,
                             repu_list=proofQ)
         except Exception as e:
             print(e, end='|')
